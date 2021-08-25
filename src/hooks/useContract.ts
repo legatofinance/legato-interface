@@ -1,11 +1,11 @@
 import { Contract } from '@ethersproject/contracts'
 import { abi as LDOGE_ABI } from '@uniswap/governance/build/Uni.json'
-import { abi as STAKING_REWARDS_ABI } from '@uniswap/liquidity-staker/build/StakingRewards.json'
 import { abi as MERKLE_DISTRIBUTOR_ABI } from '@uniswap/merkle-distributor/build/MerkleDistributor.json'
 import { abi as IUniswapV2PairABI } from '@uniswap/v2-core/build/IUniswapV2Pair.json'
 import { abi as IUniswapV2Router02ABI } from '@uniswap/v2-periphery/build/IUniswapV2Router02.json'
 import { abi as MulticallABI } from '@uniswap/v3-periphery/artifacts/contracts/lens/UniswapInterfaceMulticall.sol/UniswapInterfaceMulticall.json'
 
+import STAKING_ROUTER_ABI from 'abis/staking-router.json'
 import ARGENT_WALLET_DETECTOR_ABI from 'abis/argent-wallet-detector.json'
 import ENS_PUBLIC_RESOLVER_ABI from 'abis/ens-public-resolver.json'
 import ENS_ABI from 'abis/ens-registrar.json'
@@ -15,6 +15,7 @@ import WETH_ABI from 'abis/weth.json'
 import EIP_2612 from 'abis/eip_2612.json'
 
 import {
+  STAKING_ROUTER_ADDRESS,
   ARGENT_WALLET_DETECTOR_ADDRESS,
   MERKLE_DISTRIBUTOR_ADDRESS,
   MULTICALL_ADDRESS,
@@ -101,6 +102,6 @@ export function useUniContract() {
   return useContract(chainId ? LDOGE[chainId]?.address : undefined, LDOGE_ABI, true)
 }
 
-export function useStakingContract(stakingAddress?: string, withSignerIfPossible?: boolean) {
-  return useContract(stakingAddress, STAKING_REWARDS_ABI, withSignerIfPossible)
+export function useStakingContract(withSignerIfPossible?: boolean) {
+  return useContract(STAKING_ROUTER_ADDRESS, STAKING_ROUTER_ABI, withSignerIfPossible)
 }

@@ -8,7 +8,7 @@ import { SupportedChainId } from '../constants/chains'
 
 async function getColorFromToken(token: Token): Promise<string | null> {
   if (token.chainId !== SupportedChainId.MAINNET) {
-    return Promise.resolve('#160ce8')
+    return Promise.resolve('#3d51a5')
   }
 
   const path = `https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/smartchain/assets/${token.address}/logo.png`
@@ -46,7 +46,7 @@ async function getColorFromUriPath(uri: string): Promise<string | null> {
 }
 
 export function useColor(token?: Token) {
-  const [color, setColor] = useState('#2172E5')
+  const [color, setColor] = useState('#3d51a5')
 
   useLayoutEffect(() => {
     let stale = false
@@ -61,7 +61,7 @@ export function useColor(token?: Token) {
 
     return () => {
       stale = true
-      setColor('#2172E5')
+      setColor('#3d51a5')
     }
   }, [token])
 
@@ -69,7 +69,7 @@ export function useColor(token?: Token) {
 }
 
 export function useListColor(listImageUri?: string) {
-  const [color, setColor] = useState('#2172E5')
+  const [color, setColor] = useState('#3d51a5')
 
   useLayoutEffect(() => {
     let stale = false
@@ -84,7 +84,7 @@ export function useListColor(listImageUri?: string) {
 
     return () => {
       stale = true
-      setColor('#2172E5')
+      setColor('#3d51a5')
     }
   }, [listImageUri])
 

@@ -18,7 +18,14 @@ const WETH_ONLY: ChainTokenList = Object.fromEntries(
 // used to construct intermediary pairs for trading
 export const BASES_TO_CHECK_TRADES_AGAINST: ChainTokenList = {
   ...WETH_ONLY,
-  [SupportedChainId.MAINNET]: [...WETH_ONLY[SupportedChainId.MAINNET], USDT, BTCB, UST, ETH, USDC],
+  [SupportedChainId.MAINNET]: [
+    ...WETH_ONLY[SupportedChainId.MAINNET],
+    USDT,
+    BTCB,
+    UST,
+    ETH,
+    USDC[SupportedChainId.MAINNET],
+  ],
 }
 export const ADDITIONAL_BASES: { [chainId: number]: { [tokenAddress: string]: Token[] } } = {
   [SupportedChainId.MAINNET]: {},
@@ -38,7 +45,7 @@ export const COMMON_BASES: ChainCurrencyList = {
   [SupportedChainId.MAINNET]: [
     ExtendedEther.onChain(SupportedChainId.MAINNET),
     DAI,
-    USDC,
+    USDC[SupportedChainId.MAINNET],
     USDT,
     BTCB,
     WETH9_EXTENDED[SupportedChainId.MAINNET],
@@ -47,6 +54,8 @@ export const COMMON_BASES: ChainCurrencyList = {
   [SupportedChainId.TESTNET]: [
     ExtendedEther.onChain(SupportedChainId.TESTNET),
     WETH9_EXTENDED[SupportedChainId.TESTNET],
+    LDOGE[SupportedChainId.TESTNET],
+    USDC[SupportedChainId.TESTNET],
   ],
 }
 
@@ -67,7 +76,7 @@ export const PINNED_PAIRS: { readonly [chainId: number]: [Token, Token][] } = {
         'Compound USD Coin'
       ),
     ],
-    [USDC, USDT],
+    [USDC[SupportedChainId.MAINNET], USDT],
     [DAI, USDT],
   ],
 }

@@ -3,15 +3,17 @@ import { AutoColumn } from '../../components/Column'
 import styled from 'styled-components/macro'
 import { Link } from 'react-router-dom'
 import JSBI from 'jsbi'
-import { Token, CurrencyAmount } from '@uniswap/sdk-core'
+import { Token, CurrencyAmount, Currency } from '@uniswap/sdk-core'
 import { RouteComponentProps } from 'react-router-dom'
 import DoubleCurrencyLogo from '../../components/DoubleLogo'
+import CurrencyLogo from '../../components/CurrencyLogo'
 import { useCurrency } from '../../hooks/Tokens'
 import { useWalletModalToggle } from '../../state/application/hooks'
+import { unwrappedToken } from '../../utils/unwrappedToken'
 import { TYPE } from '../../theme'
 
 import { RowBetween } from '../../components/Row'
-import { CardSection, DataCard, CardNoise, CardBGImage } from '../../components/earn/styled'
+import { CardSection, DataCard, CardNoise, CardBGImage, CardBGImageAtmosphere } from '../../components/earn/styled'
 import { ButtonPrimary, ButtonEmpty } from '../../components/Button'
 import StakingModal from '../../components/earn/StakingModal'
 import { useStakingInfo } from '../../state/stake/hooks'
@@ -29,6 +31,7 @@ import usePrevious from '../../hooks/usePrevious'
 import useUSDCPrice from '../../hooks/useUSDCPrice'
 import { BIG_INT_ZERO, BIG_INT_SECONDS_IN_WEEK } from '../../constants/misc'
 import { Trans } from '@lingui/macro'
+import { transparentize } from 'polished'
 
 const PageWrapper = styled(AutoColumn)`
   max-width: 640px;
@@ -39,7 +42,7 @@ const PositionInfo = styled(AutoColumn)<{ dim: any }>`
   position: relative;
   max-width: 640px;
   width: 100%;
-  opacity: ${({ dim }) => (dim ? 0.6 : 1)};
+  opacity: ${({ dim }) => (dim ? 0.3 : 1)};
 `
 
 const BottomSection = styled(AutoColumn)`
@@ -53,11 +56,12 @@ const StyledDataCard = styled(DataCard)<{ bgColor?: any; showBackground?: any }>
   z-index: 2;
   box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
   background: ${({ theme, bgColor, showBackground }) =>
-    `radial-gradient(91.85% 100% at 1.84% 0%, ${bgColor} 0%,  ${showBackground ? theme.black : theme.bg5} 100%) `};
+    `radial-gradient(91.85% 100% at 1.84% 0%, ${transparentize(0.5, bgColor)} 0%,
+    ${showBackground ? theme.bg0 : theme.bg5} 100%) `};
 `
 
 const StyledBottomCard = styled(DataCard)<{ dim: any }>`
-  background: ${({ theme }) => theme.bg3};
+  background: ${({ theme }) => theme.bg0};
   opacity: ${({ dim }) => (dim ? 0.4 : 1)};
   margin-top: -40px;
   padding: 0 1.25rem 1rem 1.25rem;
@@ -73,7 +77,7 @@ const PoolData = styled(DataCard)`
 `
 
 const VoteCard = styled(DataCard)`
-  background: radial-gradient(76.02% 75.41% at 1.84% 0%, #27ae60 0%, #000000 100%);
+  background: radial-gradient(76.02% 75.41% at 1.84% 0%, #e0013b 0%, #160ce8 200%);
   overflow: hidden;
 `
 
@@ -94,13 +98,16 @@ export default function Manage({
 }: RouteComponentProps<{ currencyIdA: string; currencyIdB: string }>) {
   const { account } = useActiveWeb3React()
 
-  // get currencies and pair
-  const [currencyA, currencyB] = [useCurrency(currencyIdA), useCurrency(currencyIdB)]
-  const tokenA = (currencyA ?? undefined)?.wrapped
-  const tokenB = (currencyB ?? undefined)?.wrapped
+  const stakingInfo = useStakingInfo()?.filter(
+    (stakingInfo) =>
+      stakingInfo?.stakedToken.address === currencyIdA && stakingInfo?.rewardToken.address === currencyIdB
+  )[0]
 
-  const [, stakingTokenPair] = useV2Pair(tokenA, tokenB)
-  const stakingInfo = useStakingInfo(stakingTokenPair)?.[0]
+  const token0 = stakingInfo?.stakedPairTokens?.[0]
+  const token1 = stakingInfo?.stakedPairTokens?.[1]
+
+  const currency0 = token0 ? unwrappedToken(token0) : undefined
+  const currency1 = token1 ? unwrappedToken(token1) : undefined
 
   // detect existing unstaked LP position to show add button if none found
   const userLiquidityUnstaked = useTokenBalance(account ?? undefined, stakingInfo?.stakedAmount?.currency)
@@ -112,22 +119,24 @@ export default function Manage({
   const [showClaimRewardModal, setShowClaimRewardModal] = useState(false)
 
   // fade cards if nothing staked or nothing earned yet
-  const disableTop = !stakingInfo?.stakedAmount || stakingInfo.stakedAmount.equalTo(JSBI.BigInt(0))
+  const disableTop = !stakingInfo?.stakedAmount || stakingInfo?.stakedAmount.equalTo(JSBI.BigInt(0))
 
-  const token = currencyA?.isNative ? tokenB : tokenA
-  const WETH = currencyA?.isNative ? tokenA : tokenB
+  // get the color of the token
+  const token = currency0?.isNative ? token1 : currency0 ? token0 : stakingInfo?.stakedToken
+  const WETH = currency0?.isNative ? token0 : currency0 ? token1 : stakingInfo?.stakedToken
   const backgroundColor = useColor(token)
 
-  // get WETH value of staked LP tokens
-  const totalSupplyOfStakingToken = useTotalSupply(stakingInfo?.stakedAmount?.currency)
-  let valueOfTotalStakedAmountInWETH: CurrencyAmount<Token> | undefined
-  if (totalSupplyOfStakingToken && stakingTokenPair && stakingInfo && WETH) {
+  const totalSupplyOfStakingToken = useTotalSupply(stakingInfo?.stakedAmount.currency)
+  const [, stakingTokenPair] = useV2Pair(...(stakingInfo?.stakedPairTokens ?? []))
+
+  let valueOfTotalStakedAmountInWETH: CurrencyAmount<Currency> | undefined
+  if (totalSupplyOfStakingToken && stakingTokenPair && WETH && stakingInfo) {
     // take the total amount of LP tokens staked, multiply by ETH value of all LP tokens, divide by all LP tokens
     valueOfTotalStakedAmountInWETH = CurrencyAmount.fromRawAmount(
       WETH,
       JSBI.divide(
         JSBI.multiply(
-          JSBI.multiply(stakingInfo.totalStakedAmount.quotient, stakingTokenPair.reserveOf(WETH).quotient),
+          JSBI.multiply(stakingInfo?.totalStakedAmount.quotient, stakingTokenPair.reserveOf(WETH).quotient),
           JSBI.BigInt(2) // this is b/c the value of LP shares are ~double the value of the WETH they entitle owner to
         ),
         totalSupplyOfStakingToken.quotient
@@ -135,13 +144,19 @@ export default function Manage({
     )
   }
 
-  const countUpAmount = stakingInfo?.earnedAmount?.toFixed(6) ?? '0'
-  const countUpAmountPrevious = usePrevious(countUpAmount) ?? '0'
-
   // get the USD value of staked WETH
   const USDPrice = useUSDCPrice(WETH)
-  const valueOfTotalStakedAmountInUSDC =
-    valueOfTotalStakedAmountInWETH && USDPrice?.quote(valueOfTotalStakedAmountInWETH)
+
+  let valueOfTotalStakedAmountInUSDC: CurrencyAmount<Currency> | undefined
+  if ((WETH === stakingInfo?.stakedToken || valueOfTotalStakedAmountInWETH) && stakingInfo) {
+    valueOfTotalStakedAmountInUSDC = USDPrice?.quote(valueOfTotalStakedAmountInWETH ?? stakingInfo?.totalStakedAmount)
+  }
+
+  const countUpUnclaimedAmount = stakingInfo?.unclaimedAmount?.toFixed(6) ?? '0'
+  const countUpUnclaimedAmountPrevious = usePrevious(countUpUnclaimedAmount) ?? '0'
+
+  const countUpClaimedAmount = stakingInfo?.claimedAmount?.toFixed(6) ?? '0'
+  const countUpClaimedAmountPrevious = usePrevious(countUpClaimedAmount) ?? '0'
 
   const toggleWalletModal = useWalletModalToggle()
 
@@ -158,10 +173,16 @@ export default function Manage({
       <RowBetween style={{ gap: '24px' }}>
         <TYPE.mediumHeader style={{ margin: 0 }}>
           <Trans>
-            {currencyA?.symbol}-{currencyB?.symbol} Liquidity Mining
+            {currency0 && currency1
+              ? `${currency0?.symbol}-${currency1?.symbol} Liquidity Mining`
+              : `${stakingInfo?.stakedToken.symbol} Staking`}
           </Trans>
         </TYPE.mediumHeader>
-        <DoubleCurrencyLogo currency0={currencyA ?? undefined} currency1={currencyB ?? undefined} size={24} />
+        {currency0 && currency1 ? (
+          <DoubleCurrencyLogo currency0={currency0} currency1={currency1} size={24} />
+        ) : (
+          <CurrencyLogo currency={stakingInfo?.stakedToken} size={'24px'} />
+        )}
       </RowBetween>
 
       <DataRow style={{ gap: '24px' }}>
@@ -172,8 +193,8 @@ export default function Manage({
             </TYPE.body>
             <TYPE.body fontSize={24} fontWeight={500}>
               {valueOfTotalStakedAmountInUSDC
-                ? `$${valueOfTotalStakedAmountInUSDC.toFixed(0, { groupSeparator: ',' })}`
-                : `${valueOfTotalStakedAmountInWETH?.toSignificant(4, { groupSeparator: ',' }) ?? '-'} ETH`}
+                ? `$${valueOfTotalStakedAmountInUSDC.toFixed(2, { groupSeparator: ',' })}`
+                : `${valueOfTotalStakedAmountInWETH?.toSignificant(4, { groupSeparator: ',' }) ?? '-'} BNB`}
             </TYPE.body>
           </AutoColumn>
         </PoolData>
@@ -183,14 +204,10 @@ export default function Manage({
               <Trans>Pool Rate</Trans>
             </TYPE.body>
             <TYPE.body fontSize={24} fontWeight={500}>
-              {stakingInfo?.active ? (
-                <Trans>
-                  {stakingInfo.totalRewardRate?.multiply(BIG_INT_SECONDS_IN_WEEK)?.toFixed(0, { groupSeparator: ',' })}{' '}
-                  LDOGE / week
-                </Trans>
-              ) : (
-                <Trans>0 LDOGE / week</Trans>
-              )}
+              <Trans>
+                {stakingInfo?.totalRewardRate?.multiply(BIG_INT_SECONDS_IN_WEEK)?.toFixed(0, { groupSeparator: ',' })}{' '}
+                LDOGE / week
+              </Trans>
             </TYPE.body>
           </AutoColumn>
         </PoolData>
@@ -198,20 +215,27 @@ export default function Manage({
 
       {showAddLiquidityButton && (
         <VoteCard>
-          <CardBGImage />
+          <CardBGImage atmosphere={CardBGImageAtmosphere.URBAN} />
           <CardNoise />
           <CardSection>
             <AutoColumn gap="md">
               <RowBetween>
                 <TYPE.white fontWeight={600}>
-                  <Trans>Step 1. Get LDOGE-V2 Liquidity tokens</Trans>
+                  <Trans>
+                    {stakingInfo?.stakedPairTokens
+                      ? `Step 1. Get LDOGE-V2 Liquidity tokens`
+                      : `Step 1. Get ${stakingInfo?.stakedToken.symbol} tokens`}
+                  </Trans>
                 </TYPE.white>
               </RowBetween>
               <RowBetween style={{ marginBottom: '1rem' }}>
                 <TYPE.white fontSize={14}>
                   <Trans>
-                    LDOGE-V2 LP tokens are required. Once you&apos;ve added liquidity to the {currencyA?.symbol}-
-                    {currencyB?.symbol} pool you can stake your liquidity tokens on this page.
+                    {stakingInfo?.stakedPairTokens
+                      ? `LDOGE-V2 LP tokens are required. Once you&apos;ve added liquidity to the ${currency0?.symbol}-
+                      ${currency1?.symbol} pool you can stake your liquidity tokens on this page.`
+                      : `${stakingInfo?.stakedToken.symbol} tokens are required. Once you&apos;ve bought some
+                      you can stake your liquidity tokens on this page.`}
                   </Trans>
                 </TYPE.white>
               </RowBetween>
@@ -220,15 +244,20 @@ export default function Manage({
                 $borderRadius="8px"
                 width={'fit-content'}
                 as={Link}
-                to={`/add/${currencyA && currencyId(currencyA)}/${currencyB && currencyId(currencyB)}`}
+                to={
+                  stakingInfo?.stakedPairTokens
+                    ? `/add/${currency0 && currencyId(currency0)}/${currency1 && currencyId(currency1)}`
+                    : `/swap/${stakingInfo?.stakedToken.symbol}/BNB`
+                }
               >
                 <Trans>
-                  Add {currencyA?.symbol}-{currencyB?.symbol} liquidity
+                  {stakingInfo?.stakedPairTokens
+                    ? `Add ${currency0?.symbol}-${currency1?.symbol} liquidity`
+                    : `Swap ${stakingInfo?.stakedToken.symbol} tokens`}
                 </Trans>
               </ButtonPrimary>
             </AutoColumn>
           </CardSection>
-          <CardBGImage />
           <CardNoise />
         </VoteCard>
       )}
@@ -258,21 +287,26 @@ export default function Manage({
         <BottomSection gap="lg" justify="center">
           <StyledDataCard disabled={disableTop} bgColor={backgroundColor} showBackground={!showAddLiquidityButton}>
             <CardSection>
-              <CardBGImage desaturate />
+              <CardBGImage
+                desaturate
+                atmosphere={stakingInfo?.stakedPairTokens ? CardBGImageAtmosphere.FLYING : CardBGImageAtmosphere.FOREST}
+              />
               <CardNoise />
               <AutoColumn gap="md">
                 <RowBetween>
                   <TYPE.white fontWeight={600}>
-                    <Trans>Your liquidity deposits</Trans>
+                    <Trans>{`Your ${stakingInfo?.stakedPairTokens ? 'liquidity' : 'tokens'} deposits`}</Trans>
                   </TYPE.white>
                 </RowBetween>
                 <RowBetween style={{ alignItems: 'baseline' }}>
                   <TYPE.white fontSize={36} fontWeight={600}>
-                    {stakingInfo?.stakedAmount?.toSignificant(6) ?? '-'}
+                    {stakingInfo?.stakedAmount?.toSignificant(18) ?? '-'}
                   </TYPE.white>
                   <TYPE.white>
                     <Trans>
-                      LDOGE-V2 {currencyA?.symbol}-{currencyB?.symbol}
+                      {stakingInfo?.stakedPairTokens
+                        ? `LDOGE-V2 ${currency0?.symbol}-${currency1?.symbol}`
+                        : `${stakingInfo?.stakedToken.symbol}`}
                     </Trans>
                   </TYPE.white>
                 </RowBetween>
@@ -280,16 +314,15 @@ export default function Manage({
             </CardSection>
           </StyledDataCard>
           <StyledBottomCard dim={stakingInfo?.stakedAmount?.equalTo(JSBI.BigInt(0))}>
-            <CardBGImage desaturate />
             <CardNoise />
             <AutoColumn gap="sm">
               <RowBetween>
                 <div>
                   <TYPE.black>
-                    <Trans>Your unclaimed LDOGE</Trans>
+                    <Trans>Your unclaimed {stakingInfo?.rewardToken.symbol}</Trans>
                   </TYPE.black>
                 </div>
-                {stakingInfo?.earnedAmount && JSBI.notEqual(BIG_INT_ZERO, stakingInfo?.earnedAmount?.quotient) && (
+                {stakingInfo?.unclaimedAmount && JSBI.notEqual(BIG_INT_ZERO, stakingInfo?.unclaimedAmount?.quotient) && (
                   <ButtonEmpty
                     padding="8px"
                     $borderRadius="8px"
@@ -303,11 +336,11 @@ export default function Manage({
               <RowBetween style={{ alignItems: 'baseline' }}>
                 <TYPE.largeHeader fontSize={36} fontWeight={600}>
                   <CountUp
-                    key={countUpAmount}
+                    key={countUpUnclaimedAmount}
                     isCounting
-                    decimalPlaces={4}
-                    start={parseFloat(countUpAmountPrevious)}
-                    end={parseFloat(countUpAmount)}
+                    decimalPlaces={6}
+                    start={parseFloat(countUpUnclaimedAmountPrevious)}
+                    end={parseFloat(countUpUnclaimedAmount)}
                     thousandsSeparator={','}
                     duration={1}
                   />
@@ -317,15 +350,43 @@ export default function Manage({
                     ⚡
                   </span>
 
-                  {stakingInfo?.active ? (
-                    <Trans>
-                      {stakingInfo.rewardRate?.multiply(BIG_INT_SECONDS_IN_WEEK)?.toFixed(0, { groupSeparator: ',' })}{' '}
-                      LDOGE / week
-                    </Trans>
-                  ) : (
-                    <Trans>0 LDOGE / week</Trans>
-                  )}
+                  <Trans>
+                    {stakingInfo?.rewardRate?.multiply(BIG_INT_SECONDS_IN_WEEK)?.toFixed(0, { groupSeparator: ',' })}{' '}
+                    {stakingInfo?.rewardToken.symbol} / week
+                  </Trans>
                 </TYPE.black>
+              </RowBetween>
+            </AutoColumn>
+            <AutoColumn gap="sm" style={{ marginTop: '1rem' }}>
+              <RowBetween>
+                <div>
+                  <TYPE.black>
+                    <Trans>Your claimed {stakingInfo?.rewardToken.symbol}</Trans>
+                  </TYPE.black>
+                </div>
+                {stakingInfo?.claimedAmount && JSBI.notEqual(BIG_INT_ZERO, stakingInfo?.claimedAmount?.quotient) && (
+                  <ButtonEmpty
+                    padding="8px"
+                    $borderRadius="8px"
+                    width="fit-content"
+                    onClick={() => setShowClaimRewardModal(true)}
+                  >
+                    <Trans>Retrieve</Trans>
+                  </ButtonEmpty>
+                )}
+              </RowBetween>
+              <RowBetween style={{ alignItems: 'baseline' }}>
+                <TYPE.largeHeader fontSize={36} fontWeight={600}>
+                  <CountUp
+                    key={countUpClaimedAmount}
+                    isCounting
+                    decimalPlaces={6}
+                    start={parseFloat(countUpClaimedAmountPrevious)}
+                    end={parseFloat(countUpClaimedAmount)}
+                    thousandsSeparator={','}
+                    duration={1}
+                  />
+                </TYPE.largeHeader>
               </RowBetween>
             </AutoColumn>
           </StyledBottomCard>
@@ -334,17 +395,38 @@ export default function Manage({
           <span role="img" aria-label="wizard-icon" style={{ marginRight: '8px' }}>
             ⭐️
           </span>
-          <Trans>When you withdraw, the contract will automagically claim LDOGE on your behalf!</Trans>
+          <Trans>
+            When you withdraw, the contract will automatically claim {stakingInfo?.rewardToken.symbol} on your behalf!
+            <br />
+          </Trans>
+          {stakingInfo?.stakedToken.equals(stakingInfo?.rewardToken) && (
+            <>
+              <span role="img" aria-label="wizard-icon" style={{ marginRight: '8px' }}>
+                ⭐️
+              </span>
+              <Trans>Claimed {stakingInfo?.rewardToken.symbol} are automatically deposited to the pool</Trans>
+            </>
+          )}
         </TYPE.main>
 
         {!showAddLiquidityButton && (
-          <DataRow style={{ marginBottom: '1rem' }}>
-            {stakingInfo && stakingInfo.active && (
-              <ButtonPrimary padding="8px" $borderRadius="8px" width="160px" onClick={handleDepositClick}>
+          <DataRow style={{ margin: '0.5rem 0' }}>
+            {stakingInfo && (
+              <ButtonPrimary
+                padding="8px"
+                $borderRadius="8px"
+                width={stakingInfo?.stakedAmount?.greaterThan(JSBI.BigInt(0)) ? '160px' : '200px'}
+                onClick={handleDepositClick}
+              >
                 {stakingInfo?.stakedAmount?.greaterThan(JSBI.BigInt(0)) ? (
                   <Trans>Deposit</Trans>
                 ) : (
-                  <Trans>Deposit LDOGE-V2 LP Tokens</Trans>
+                  <Trans>
+                    Deposit
+                    {stakingInfo?.stakedPairTokens
+                      ? ` ${currency0?.symbol}-${currency1?.symbol}`
+                      : ` ${stakingInfo?.stakedToken.symbol}`}
+                  </Trans>
                 )}
               </ButtonPrimary>
             )}
@@ -363,9 +445,14 @@ export default function Manage({
             )}
           </DataRow>
         )}
-        {!userLiquidityUnstaked ? null : userLiquidityUnstaked.equalTo('0') ? null : !stakingInfo?.active ? null : (
+        {!userLiquidityUnstaked ? null : userLiquidityUnstaked.equalTo('0') ? null : (
           <TYPE.main>
-            <Trans>{userLiquidityUnstaked.toSignificant(6)} LDOGE-V2 LP tokens available</Trans>
+            <Trans>
+              {userLiquidityUnstaked.toSignificant(6)}
+              {stakingInfo?.stakedPairTokens
+                ? ` LDOGE-V2 LP tokens available`
+                : ` ${stakingInfo?.stakedToken.symbol} tokens available`}
+            </Trans>
           </TYPE.main>
         )}
       </PositionInfo>

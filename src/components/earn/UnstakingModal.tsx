@@ -39,7 +39,7 @@ export default function UnstakingModal({ isOpen, onDismiss, stakingInfo }: Staki
     onDismiss()
   }
 
-  const stakingContract = useStakingContract(stakingInfo.stakingRewardAddress)
+  const stakingContract = useStakingContract()
 
   async function onWithdraw() {
     if (stakingContract && stakingInfo?.stakedAmount) {
@@ -87,10 +87,10 @@ export default function UnstakingModal({ isOpen, onDismiss, stakingInfo }: Staki
               </TYPE.body>
             </AutoColumn>
           )}
-          {stakingInfo?.earnedAmount && (
+          {stakingInfo?.unclaimedAmount && (
             <AutoColumn justify="center" gap="md">
               <TYPE.body fontWeight={600} fontSize={36}>
-                {<FormattedCurrencyAmount currencyAmount={stakingInfo?.earnedAmount} />}
+                {<FormattedCurrencyAmount currencyAmount={stakingInfo?.unclaimedAmount} />}
               </TYPE.body>
               <TYPE.body>
                 <Trans>Unclaimed LDOGE</Trans>
@@ -112,7 +112,7 @@ export default function UnstakingModal({ isOpen, onDismiss, stakingInfo }: Staki
               <Trans>Withdrawing {stakingInfo?.stakedAmount?.toSignificant(4)} LDOGE-V2</Trans>
             </TYPE.body>
             <TYPE.body fontSize={20}>
-              <Trans>Claiming {stakingInfo?.earnedAmount?.toSignificant(4)} LDOGE</Trans>
+              <Trans>Claiming {stakingInfo?.unclaimedAmount?.toSignificant(4)} LDOGE</Trans>
             </TYPE.body>
           </AutoColumn>
         </LoadingView>

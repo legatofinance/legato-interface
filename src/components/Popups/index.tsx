@@ -2,7 +2,6 @@ import styled from 'styled-components/macro'
 import { useActivePopups } from '../../state/application/hooks'
 import { AutoColumn } from '../Column'
 import PopupItem from './PopupItem'
-import ClaimPopup from './ClaimPopup'
 import { useURLWarningVisible } from '../../state/user/hooks'
 import { useActiveWeb3React } from 'hooks/web3'
 import { SupportedChainId } from 'constants/chains'
@@ -67,7 +66,6 @@ export default function Popups() {
   return (
     <>
       <FixedPopupColumn gap="20px" extraPadding={urlWarningActive} xlPadding={isNotOnMainnet}>
-        <ClaimPopup />
         {activePopups.map((item) => (
           <PopupItem key={item.key} content={item.content} popKey={item.key} removeAfterMs={item.removeAfterMs} />
         ))}

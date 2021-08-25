@@ -17,10 +17,11 @@ import { useActiveWeb3React } from '../../hooks/web3'
 import { useV2Pairs } from '../../hooks/useV2Pairs'
 import { toV2LiquidityToken, useTrackedTokenPairs } from '../../state/user/hooks'
 import { Dots } from '../../components/swap/styleds'
-import { CardSection, DataCard, CardNoise, CardBGImage } from '../../components/earn/styled'
+import { CardSection, DataCard, CardNoise, CardBGImage, CardBGImageAtmosphere } from '../../components/earn/styled'
 import { SwitchLocaleLink } from '../../components/SwitchLocaleLink'
 import { useStakingInfo } from '../../state/stake/hooks'
 import { BIG_INT_ZERO } from '../../constants/misc'
+import { STAKING_ROUTER_ADDRESS } from '../../constants/addresses'
 import { Pair } from '@lambodoge/sdk'
 import { Trans } from '@lingui/macro'
 
@@ -79,7 +80,7 @@ const EmptyProposals = styled.div`
 
 export default function Pool() {
   const theme = useContext(ThemeContext)
-  const { account } = useActiveWeb3React()
+  const { account, chainId } = useActiveWeb3React()
 
   // fetch the user's balances of all tracked V2 LP tokens
   const trackedTokenPairs = useTrackedTokenPairs()
@@ -116,7 +117,9 @@ export default function Pool() {
   const stakingInfosWithBalance = stakingInfo?.filter((pool) =>
     JSBI.greaterThan(pool.stakedAmount.quotient, BIG_INT_ZERO)
   )
-  const stakingPairs = useV2Pairs(stakingInfosWithBalance?.map((stakingInfo) => stakingInfo.tokens))
+  const stakingPairs = useV2Pairs(
+    stakingInfosWithBalance?.map((stakingInfo) => stakingInfo?.stakedPairTokens ?? [undefined, undefined]) ?? []
+  )
 
   // remove any pairs that also are included in pairs with stake in mining pool
   const v2PairsWithoutStakedAmount = allV2PairsWithLiquidity.filter((v2Pair) => {
@@ -132,7 +135,7 @@ export default function Pool() {
       <PageWrapper>
         <SwapPoolTabs active={'pool'} />
         <VoteCard>
-          <CardBGImage />
+          <CardBGImage atmosphere={CardBGImageAtmosphere.URBAN} />
           <CardNoise />
           <CardSection>
             <AutoColumn gap="md">
@@ -160,7 +163,6 @@ export default function Pool() {
               </ExternalLink>
             </AutoColumn>
           </CardSection>
-          <CardBGImage />
           <CardNoise />
         </VoteCard>
 
@@ -169,7 +171,7 @@ export default function Pool() {
             <TitleRow style={{ marginTop: '1rem' }} padding={'0'}>
               <HideSmall>
                 <TYPE.mediumHeader style={{ marginTop: '0.5rem', justifySelf: 'flex-start' }}>
-                  <Trans>Your V2 liquidity</Trans>
+                  <Trans>Your liquidity</Trans>
                 </TYPE.mediumHeader>
               </HideSmall>
               <ButtonRow>
@@ -212,9 +214,10 @@ export default function Pool() {
                   (stakingPair, i) =>
                     stakingPair[1] && ( // skip pairs that arent loaded
                       <FullPositionCard
-                        key={stakingInfosWithBalance[i].stakingRewardAddress}
+                        key={chainId ? STAKING_ROUTER_ADDRESS[chainId] : undefined}
                         pair={stakingPair[1]}
-                        stakedBalance={stakingInfosWithBalance[i].stakedAmount}
+                        stakedBalance={stakingInfosWithBalance?.[i].stakedAmount}
+                        stakeRewardToken={stakingInfosWithBalance?.[i].rewardToken}
                       />
                     )
                 )}

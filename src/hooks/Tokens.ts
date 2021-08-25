@@ -6,13 +6,22 @@ import { createTokenFilterFunction } from '../components/SearchModal/filtering'
 import { ExtendedEther, WETH9_EXTENDED } from '../constants/tokens'
 import { useAllLists, useCombinedActiveList, useInactiveListUrls } from '../state/lists/hooks'
 import { WrappedTokenInfo } from '../state/lists/wrappedTokenInfo'
-import { NEVER_RELOAD, useSingleCallResult } from '../state/multicall/hooks'
+import { NEVER_RELOAD, useSingleCallResult, useMultipleContractSingleData } from '../state/multicall/hooks'
 import { useUserAddedTokens } from '../state/user/hooks'
 import { isAddress } from '../utils'
 import { TokenAddressMap, useUnsupportedTokenList } from './../state/lists/hooks'
 
+import { Interface } from '@ethersproject/abi'
+import ERC20_ABI from 'abis/erc20.json'
+import { Erc20Interface } from 'abis/types/Erc20'
+import ERC20_BYTES32_ABI from 'abis/erc20_bytes32.json'
+import { Erc20Bytes32Interface } from 'abis/types/Erc20Bytes32'
+
 import { useActiveWeb3React } from './web3'
 import { useBytes32TokenContract, useTokenContract } from './useContract'
+
+const ERC20Interface = new Interface(ERC20_ABI) as Erc20Interface
+const ERC20Bytes32Interface = new Interface(ERC20_BYTES32_ABI) as Erc20Bytes32Interface
 
 // reduce token map into standard address <-> Token mapping, optionally include user added tokens
 function useTokensFromMap(tokenMap: TokenAddressMap, includeUserAdded: boolean): { [address: string]: Token } {
@@ -120,6 +129,48 @@ function parseStringOrBytes32(str: string | undefined, bytes32: string | undefin
     bytes32 && BYTES32_REGEX.test(bytes32) && arrayify(bytes32)[31] === 0
     ? parseBytes32String(bytes32)
     : defaultValue
+}
+
+export function useTokens(tokenAddresses?: string[]): (Token | undefined | null)[] | undefined {
+  const { chainId } = useActiveWeb3React()
+
+  const addresses = tokenAddresses?.map((tokenAddress) => isAddress(tokenAddress) || undefined) ?? []
+
+  const tokenName = useMultipleContractSingleData(addresses, ERC20Interface, 'name', undefined, NEVER_RELOAD)
+  const tokenNameBytes32 = useMultipleContractSingleData(
+    addresses,
+    ERC20Bytes32Interface,
+    'name',
+    undefined,
+    NEVER_RELOAD
+  )
+  const symbol = useMultipleContractSingleData(addresses, ERC20Interface, 'symbol', undefined, NEVER_RELOAD)
+  const symbolBytes32 = useMultipleContractSingleData(
+    addresses,
+    ERC20Bytes32Interface,
+    'symbol',
+    undefined,
+    NEVER_RELOAD
+  )
+  const decimals = useMultipleContractSingleData(addresses, ERC20Interface, 'decimals', undefined, NEVER_RELOAD)
+
+  return useMemo(() => {
+    if (!chainId) return undefined
+
+    return addresses.map((address, index) => {
+      if (!decimals[index] || decimals[index].loading || symbol[index].loading || tokenName[index].loading) return null
+      if (decimals[index]?.result?.[0] && address) {
+        return new Token(
+          chainId,
+          address,
+          decimals[index]?.result?.[0],
+          parseStringOrBytes32(symbol[index].result?.[0], symbolBytes32[index].result?.[0], 'UNKNOWN'),
+          parseStringOrBytes32(tokenName[index].result?.[0], tokenNameBytes32[index].result?.[0], 'Unknown Token')
+        )
+      }
+      return undefined
+    }) as (Token | undefined | null)[]
+  }, [addresses, chainId, decimals, symbol, symbolBytes32, tokenName, tokenNameBytes32])
 }
 
 // undefined if invalid or does not exist

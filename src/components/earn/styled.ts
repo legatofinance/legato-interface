@@ -1,8 +1,9 @@
 import styled from 'styled-components/macro'
 import { AutoColumn } from '../Column'
 
-import uImage from '../../assets/images/big_unicorn.png'
-import xlUnicorn from '../../assets/images/xl_uni.png'
+import uFlying from '../../assets/images/flying.png'
+import uForest from '../../assets/images/forest.png'
+import uUrban from '../../assets/images/urban.png'
 import noise from '../../assets/images/noise.png'
 
 export const DataCard = styled(AutoColumn)<{ disabled?: boolean }>`
@@ -13,8 +14,23 @@ export const DataCard = styled(AutoColumn)<{ disabled?: boolean }>`
   overflow: hidden;
 `
 
-export const CardBGImage = styled.span<{ desaturate?: boolean }>`
-  background: url(${uImage});
+export enum CardBGImageAtmosphere {
+  FOREST = 'FOREST',
+  URBAN = 'URBAN',
+  FLYING = 'FLYING',
+}
+
+export const CardBGImage = styled.span<{ desaturate?: boolean; atmosphere?: CardBGImageAtmosphere }>`
+  ${({ atmosphere }) => {
+    switch (atmosphere ?? CardBGImageAtmosphere.URBAN) {
+      case CardBGImageAtmosphere.FOREST:
+        return `background: url(${uForest})`
+      case CardBGImageAtmosphere.URBAN:
+        return `background: url(${uUrban})`
+      case CardBGImageAtmosphere.FLYING:
+        return `background: url(${uFlying})`
+    }
+  }};
   width: 1000px;
   height: 600px;
   position: absolute;
@@ -24,20 +40,6 @@ export const CardBGImage = styled.span<{ desaturate?: boolean }>`
   left: -100px;
   transform: rotate(-15deg);
   user-select: none;
-  ${({ desaturate }) => desaturate && `filter: saturate(0)`}
-`
-
-export const CardBGImageSmaller = styled.span<{ desaturate?: boolean }>`
-  background: url(${xlUnicorn});
-  width: 1200px;
-  height: 1200px;
-  position: absolute;
-  border-radius: 12px;
-  top: -300px;
-  left: -300px;
-  opacity: 0.4;
-  user-select: none;
-
   ${({ desaturate }) => desaturate && `filter: saturate(0)`}
 `
 

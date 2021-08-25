@@ -15,6 +15,7 @@ import { Token, CurrencyAmount } from '@uniswap/sdk-core'
 import { useActiveWeb3React } from '../../hooks/web3'
 import { maxAmountSpend } from '../../utils/maxAmountSpend'
 import { usePairContract, useStakingContract, useV2RouterContract } from '../../hooks/useContract'
+import { STAKING_ROUTER_ADDRESS } from 'constants/addresses'
 import { useApproveCallback, ApprovalState } from '../../hooks/useApproveCallback'
 import { StakingInfo, useDerivedStakeInfo } from '../../state/stake/hooks'
 import { TransactionResponse } from '@ethersproject/providers'
@@ -28,7 +29,7 @@ const HypotheticalRewardRate = styled.div<{ dim: boolean }>`
   padding-right: 20px;
   padding-left: 20px;
 
-  opacity: ${({ dim }) => (dim ? 0.5 : 1)};
+  opacity: ${({ dim }) => (dim ? 1 : 1)};
 `
 
 const ContentWrapper = styled(AutoColumn)`
@@ -44,7 +45,7 @@ interface StakingModalProps {
 }
 
 export default function StakingModal({ isOpen, onDismiss, stakingInfo, userLiquidityUnstaked }: StakingModalProps) {
-  const { library } = useActiveWeb3React()
+  const { chainId, library } = useActiveWeb3React()
 
   // track and parse user input
   const [typedValue, setTypedValue] = useState('')
@@ -75,34 +76,27 @@ export default function StakingModal({ isOpen, onDismiss, stakingInfo, userLiqui
   }, [onDismiss])
 
   // pair contract for this token to be staked
-  const dummyPair = new Pair(
-    CurrencyAmount.fromRawAmount(stakingInfo.tokens[0], '0'),
-    CurrencyAmount.fromRawAmount(stakingInfo.tokens[1], '0')
-  )
-  const pairContract = usePairContract(dummyPair.liquidityToken.address)
+  const dummyPair = stakingInfo.stakedPairTokens
+    ? new Pair(
+        CurrencyAmount.fromRawAmount(stakingInfo.stakedPairTokens[0], '0'),
+        CurrencyAmount.fromRawAmount(stakingInfo.stakedPairTokens[1], '0')
+      )
+    : undefined
 
   // approval data for stake
   const deadline = useTransactionDeadline()
-  const router = useV2RouterContract()
-  const { signatureData, gatherPermitSignature } = useV2LiquidityTokenPermit(parsedAmountWrapped, router?.address)
-  const [approval, approveCallback] = useApproveCallback(parsedAmount, stakingInfo.stakingRewardAddress)
+  const [approval, approveCallback] = useApproveCallback(
+    parsedAmount,
+    chainId ? STAKING_ROUTER_ADDRESS[chainId] : undefined
+  )
 
-  const stakingContract = useStakingContract(stakingInfo.stakingRewardAddress)
+  const stakingContract = useStakingContract()
   async function onStake() {
     setAttempting(true)
     if (stakingContract && parsedAmount && deadline) {
       if (approval === ApprovalState.APPROVED) {
-        await stakingContract.stake(`0x${parsedAmount.quotient.toString(16)}`, { gasLimit: 350000 })
-      } else if (signatureData) {
         stakingContract
-          .stakeWithPermit(
-            `0x${parsedAmount.quotient.toString(16)}`,
-            signatureData.deadline,
-            signatureData.v,
-            signatureData.r,
-            signatureData.s,
-            { gasLimit: 350000 }
-          )
+          .stakeTokens(stakingInfo.poolIndex, `0x${parsedAmount.quotient.toString(16)}`)
           .then((response: TransactionResponse) => {
             addTransaction(response, {
               summary: t`Deposit liquidity`,
@@ -115,7 +109,7 @@ export default function StakingModal({ isOpen, onDismiss, stakingInfo, userLiqui
           })
       } else {
         setAttempting(false)
-        throw new Error('Attempting to stake without approval or a signature. Please contact support.')
+        throw new Error('Attempting to stake without approval. Please contact support.')
       }
     }
   }
@@ -131,24 +125,6 @@ export default function StakingModal({ isOpen, onDismiss, stakingInfo, userLiqui
   const handleMax = useCallback(() => {
     maxAmountInput && onUserInput(maxAmountInput.toExact())
   }, [maxAmountInput, onUserInput])
-
-  async function onAttemptToApprove() {
-    if (!pairContract || !library || !deadline) throw new Error('missing dependencies')
-    if (!parsedAmount) throw new Error('missing liquidity amount')
-
-    if (gatherPermitSignature) {
-      try {
-        await gatherPermitSignature()
-      } catch (error) {
-        // try to approve if gatherPermitSignature failed for any reason other than the user rejecting it
-        if (error?.code !== 4001) {
-          await approveCallback()
-        }
-      }
-    } else {
-      await approveCallback()
-    }
-  }
 
   return (
     <Modal isOpen={isOpen} onDismiss={wrappedOnDismiss} maxHeight={90}>
@@ -192,31 +168,31 @@ export default function StakingModal({ isOpen, onDismiss, stakingInfo, userLiqui
           <RowBetween>
             <ButtonConfirmed
               mr="0.5rem"
-              onClick={onAttemptToApprove}
-              confirmed={approval === ApprovalState.APPROVED || signatureData !== null}
-              disabled={approval !== ApprovalState.NOT_APPROVED || signatureData !== null}
+              onClick={approveCallback}
+              confirmed={approval === ApprovalState.APPROVED}
+              disabled={approval !== ApprovalState.NOT_APPROVED}
             >
               <Trans>Approve</Trans>
             </ButtonConfirmed>
             <ButtonError
-              disabled={!!error || (signatureData === null && approval !== ApprovalState.APPROVED)}
+              disabled={!!error || approval !== ApprovalState.APPROVED}
               error={!!error && !!parsedAmount}
               onClick={onStake}
             >
               {error ?? <Trans>Deposit</Trans>}
             </ButtonError>
           </RowBetween>
-          <ProgressCircles steps={[approval === ApprovalState.APPROVED || signatureData !== null]} disabled={true} />
+          <ProgressCircles steps={[approval === ApprovalState.APPROVED]} disabled={true} />
         </ContentWrapper>
       )}
       {attempting && !hash && (
         <LoadingView onDismiss={wrappedOnDismiss}>
           <AutoColumn gap="12px" justify={'center'}>
             <TYPE.largeHeader>
-              <Trans>Depositing Liquidity</Trans>
+              <Trans>Depositing {stakingInfo?.stakedPairTokens ? 'Liquidity' : 'Tokens'}</Trans>
             </TYPE.largeHeader>
             <TYPE.body fontSize={20}>
-              <Trans>{parsedAmount?.toSignificant(4)} LDOGE-V2</Trans>
+              <Trans>{parsedAmount?.toSignificant(18)} LDOGE-V2</Trans>
             </TYPE.body>
           </AutoColumn>
         </LoadingView>

@@ -1,6 +1,6 @@
 {
   "name": "@uniswap/interface",
-  "description": "Uniswap Interface",
+  "description": "LamboDoge Interface",
   "homepage": ".",
   "private": true,
   "devDependencies": {

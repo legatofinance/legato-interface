@@ -16,7 +16,7 @@ import { useAggregateUniBalance, useTokenBalance } from '../../state/wallet/hook
 import { ExternalLink, StyledInternalLink, TYPE, UniTokenAnimated } from '../../theme'
 import { computeUniCirculation } from '../../utils/computeUniCirculation'
 import { AutoColumn } from '../Column'
-import { Break, CardBGImage, CardNoise, CardSection, DataCard } from '../earn/styled'
+import { Break, CardBGImage, CardNoise, CardSection, DataCard, CardBGImageAtmosphere } from '../earn/styled'
 import { RowBetween } from '../Row'
 
 const ContentWrapper = styled(AutoColumn)`
@@ -99,7 +99,7 @@ export default function UniBalanceContent({ setShowUniBalanceModal }: { setShowU
                   <TYPE.white color="white">
                     {uniToClaim?.toFixed(4, { groupSeparator: ',' })}{' '}
                     {uniToClaim && uniToClaim.greaterThan('0') && (
-                      <StyledInternalLink onClick={() => setShowUniBalanceModal(false)} to="/uni">
+                      <StyledInternalLink onClick={() => setShowUniBalanceModal(false)} to="/stake">
                         <Trans>(claim)</Trans>
                       </StyledInternalLink>
                     )}

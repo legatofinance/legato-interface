@@ -54,7 +54,7 @@ export default function CurrencyLogo({
 
   if (currency?.isNative) {
     return <StyledBinanceLogo src={BinanceLogo} size={size} style={style} {...rest} />
-  } else if (currency?.equals(LDOGE[SupportedChainId.MAINNET])) {
+  } else if (currency?.equals(LDOGE[SupportedChainId.MAINNET]) || currency?.equals(LDOGE[SupportedChainId.TESTNET])) {
     return <StyledBinanceLogo src={LambodogeLogo} size={size} style={style} {...rest} />
   }
 

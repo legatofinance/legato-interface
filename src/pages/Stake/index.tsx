@@ -1,16 +1,18 @@
+import { useContext } from 'react'
 import JSBI from 'jsbi'
 import { AutoColumn } from '../../components/Column'
-import styled from 'styled-components/macro'
-import { STAKING_REWARDS_INFO, useStakingInfo } from '../../state/stake/hooks'
+import styled, { ThemeContext } from 'styled-components/macro'
+import { useStakingInfo } from '../../state/stake/hooks'
 import { TYPE, ExternalLink } from '../../theme'
 import PoolCard from '../../components/earn/PoolCard'
 import { RowBetween } from '../../components/Row'
-import { CardSection, DataCard, CardNoise, CardBGImage } from '../../components/earn/styled'
-import { Countdown } from './Countdown'
+import { CardSection, DataCard, CardNoise, CardBGImage, CardBGImageAtmosphere } from '../../components/earn/styled'
 import Loader from '../../components/Loader'
 import { useActiveWeb3React } from '../../hooks/web3'
 import { BIG_INT_ZERO } from '../../constants/misc'
-import { OutlineCard } from '../../components/Card'
+import { STAKING_ROUTER_ADDRESS } from '../../constants/addresses'
+import Card, { OutlineCard } from '../../components/Card'
+import { currencyId } from '../../utils/currencyId'
 import { Trans } from '@lingui/macro'
 
 const PageWrapper = styled(AutoColumn)`
@@ -39,25 +41,19 @@ flex-direction: column;
 `
 
 export default function Earn() {
-  const { chainId } = useActiveWeb3React()
+  const theme = useContext(ThemeContext)
+  const { chainId, account } = useActiveWeb3React()
 
   // staking info for connected account
-  const stakingInfos = useStakingInfo()
-
-  /**
-   * only show staking cards with balance
-   * @todo only account for this if rewards are inactive
-   */
-  const stakingInfosWithBalance = stakingInfos?.filter((s) => JSBI.greaterThan(s.stakedAmount.quotient, BIG_INT_ZERO))
-
-  // toggle copy if rewards are inactive
-  const stakingRewardsExist = Boolean(typeof chainId === 'number' && (STAKING_REWARDS_INFO[chainId]?.length ?? 0) > 0)
+  const stakingInfos = useStakingInfo()?.filter(
+    (stakingInfo) => stakingInfo.open || stakingInfo.stakedAmount.greaterThan('0')
+  )
 
   return (
     <PageWrapper gap="lg" justify="center">
       <TopSection gap="md">
         <DataCard>
-          <CardBGImage />
+          <CardBGImage atmosphere={CardBGImageAtmosphere.URBAN} />
           <CardNoise />
           <CardSection>
             <AutoColumn gap="md">
@@ -82,7 +78,6 @@ export default function Earn() {
               </ExternalLink>
             </AutoColumn>
           </CardSection>
-          <CardBGImage />
           <CardNoise />
         </DataCard>
       </TopSection>
@@ -92,24 +87,25 @@ export default function Earn() {
           <TYPE.mediumHeader style={{ marginTop: '0.5rem' }}>
             <Trans>Participating pools</Trans>
           </TYPE.mediumHeader>
-          <Countdown exactEnd={stakingInfos?.[0]?.periodFinish} />
         </DataRow>
 
         <PoolSection>
-          {stakingRewardsExist && stakingInfos?.length === 0 ? (
+          {!account ? (
+            <Card padding="40px">
+              <TYPE.body color={theme.text3} textAlign="center">
+                <Trans>Connect to a wallet to view your liquidity.</Trans>
+              </TYPE.body>
+            </Card>
+          ) : !stakingInfos ? (
             <Loader style={{ margin: 'auto' }} />
-          ) : !stakingRewardsExist ? (
-            <OutlineCard>
-              <Trans>No active pools</Trans>
-            </OutlineCard>
-          ) : stakingInfos?.length !== 0 && stakingInfosWithBalance.length === 0 ? (
+          ) : stakingInfos?.length === 0 ? (
             <OutlineCard>
               <Trans>No active pools</Trans>
             </OutlineCard>
           ) : (
-            stakingInfosWithBalance?.map((stakingInfo) => {
+            stakingInfos?.map((stakingInfo, index) => {
               // need to sort by added liquidity here
-              return <PoolCard key={stakingInfo.stakingRewardAddress} stakingInfo={stakingInfo} />
+              return <PoolCard key={`${currencyId(stakingInfo?.stakedToken)}-${index}`} stakingInfo={stakingInfo} />
             })
           )}
         </PoolSection>

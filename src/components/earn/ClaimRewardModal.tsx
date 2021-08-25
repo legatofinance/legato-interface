@@ -38,7 +38,7 @@ export default function ClaimRewardModal({ isOpen, onDismiss, stakingInfo }: Sta
     onDismiss()
   }
 
-  const stakingContract = useStakingContract(stakingInfo.stakingRewardAddress)
+  const stakingContract = useStakingContract()
 
   async function onClaimReward() {
     if (stakingContract && stakingInfo?.stakedAmount) {
@@ -74,10 +74,10 @@ export default function ClaimRewardModal({ isOpen, onDismiss, stakingInfo }: Sta
             </TYPE.mediumHeader>
             <CloseIcon onClick={wrappedOnDismiss} />
           </RowBetween>
-          {stakingInfo?.earnedAmount && (
+          {stakingInfo?.unclaimedAmount && (
             <AutoColumn justify="center" gap="md">
               <TYPE.body fontWeight={600} fontSize={36}>
-                {stakingInfo?.earnedAmount?.toSignificant(6)}
+                {stakingInfo?.unclaimedAmount?.toSignificant(6)}
               </TYPE.body>
               <TYPE.body>
                 <Trans>Unclaimed LDOGE</Trans>
@@ -96,7 +96,7 @@ export default function ClaimRewardModal({ isOpen, onDismiss, stakingInfo }: Sta
         <LoadingView onDismiss={wrappedOnDismiss}>
           <AutoColumn gap="12px" justify={'center'}>
             <TYPE.body fontSize={20}>
-              <Trans>Claiming {stakingInfo?.earnedAmount?.toSignificant(6)} LDOGE</Trans>
+              <Trans>Claiming {stakingInfo?.unclaimedAmount?.toSignificant(6)} LDOGE</Trans>
             </TYPE.body>
           </AutoColumn>
         </LoadingView>

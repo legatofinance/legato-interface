@@ -9,13 +9,11 @@ import { NetworkConnector } from './NetworkConnector'
 
 const NETWORK_URL = process.env.REACT_APP_NETWORK_URL
 
-export const NETWORK_CHAIN_ID: number = parseInt(process.env.REACT_APP_CHAIN_ID ?? '56')
-
 const WALLETCONNECT_BRIDGE_URL = process.env.REACT_APP_WALLETCONNECT_BRIDGE_URL
 
 const NETWORK_URLS: { [key in SupportedChainId]: string } = {
   [SupportedChainId.MAINNET]: `${NETWORK_URL}`,
-  [SupportedChainId.TESTNET]: `https://data-seed-prebsc-1-s1.binance.org:8545`,
+  [SupportedChainId.TESTNET]: `https://data-seed-prebsc-2-s1.binance.org:8545/`,
 }
 
 export const network = new NetworkConnector({
@@ -46,6 +44,6 @@ export const walletconnect = new WalletConnectConnector({
 // mainnet only
 export const walletlink = new WalletLinkConnector({
   url: NETWORK_URLS[SupportedChainId.MAINNET],
-  appName: 'Uniswap',
+  appName: 'LamboDoge',
   appLogoUrl: LDOGESWAP_LOGO_URL,
 })

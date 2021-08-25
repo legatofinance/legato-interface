@@ -16,7 +16,7 @@ import { currencyId } from '../../utils/currencyId'
 import { unwrappedToken } from '../../utils/unwrappedToken'
 import { ButtonPrimary, ButtonSecondary, ButtonEmpty } from '../Button'
 import { transparentize } from 'polished'
-import { CardNoise } from '../earn/styled'
+import { CardBGImage, CardBGImageAtmosphere } from '../earn/styled'
 
 import { useColor } from '../../hooks/useColor'
 
@@ -35,7 +35,7 @@ export const FixedHeightRow = styled(RowBetween)`
 const StyledPositionCard = styled(LightCard)<{ bgColor: any }>`
   border: none;
   background: ${({ theme, bgColor }) =>
-    `radial-gradient(91.85% 100% at 1.84% 0%, ${transparentize(0.8, bgColor)} 0%, ${theme.bg3} 100%) `};
+    `radial-gradient(91.85% 100% at 1.84% 0%, ${transparentize(0.5, bgColor)} 0%, ${theme.bg0} 100%) `};
   position: relative;
   overflow: hidden;
 `
@@ -45,6 +45,7 @@ interface PositionCardProps {
   showUnwrapped?: boolean
   border?: string
   stakedBalance?: CurrencyAmount<Token> // optional balance to indicate that liquidity is deposited in mining pool
+  stakeRewardToken?: Token // optional token address
 }
 
 export function MinimalPositionCard({ pair, showUnwrapped = false, border }: PositionCardProps) {
@@ -159,7 +160,7 @@ export function MinimalPositionCard({ pair, showUnwrapped = false, border }: Pos
   )
 }
 
-export default function FullPositionCard({ pair, border, stakedBalance }: PositionCardProps) {
+export default function FullPositionCard({ pair, border, stakedBalance, stakeRewardToken }: PositionCardProps) {
   const { account } = useActiveWeb3React()
 
   const currency0 = unwrappedToken(pair.token0)
@@ -196,7 +197,7 @@ export default function FullPositionCard({ pair, border, stakedBalance }: Positi
 
   return (
     <StyledPositionCard border={border} bgColor={backgroundColor}>
-      <CardNoise />
+      <CardBGImage desaturate atmosphere={CardBGImageAtmosphere.FLYING} />
       <AutoColumn gap="12px">
         <FixedHeightRow>
           <AutoRow gap="8px" style={{ marginLeft: '8px' }}>
@@ -310,13 +311,13 @@ export default function FullPositionCard({ pair, border, stakedBalance }: Positi
               </ExternalLink>
             </ButtonSecondary>
             {userDefaultPoolBalance && JSBI.greaterThan(userDefaultPoolBalance.quotient, BIG_INT_ZERO) && (
-              <AutoRow marginTop="10px" justify="space-around">
+              <AutoRow marginTop="10px" justify="space-around" style={{ flexWrap: 'nowrap', gap: '8px' }}>
                 <ButtonPrimary
                   padding="8px"
                   $borderRadius="8px"
                   as={Link}
                   to={`/add/${currencyId(currency0)}/${currencyId(currency1)}`}
-                  width="32%"
+                  width="100%"
                 >
                   <Trans>Add</Trans>
                 </ButtonPrimary>
@@ -324,19 +325,19 @@ export default function FullPositionCard({ pair, border, stakedBalance }: Positi
                   padding="8px"
                   $borderRadius="8px"
                   as={Link}
-                  width="32%"
+                  width="100%"
                   to={`/remove/${currencyId(currency0)}/${currencyId(currency1)}`}
                 >
                   <Trans>Remove</Trans>
                 </ButtonPrimary>
               </AutoRow>
             )}
-            {stakedBalance && JSBI.greaterThan(stakedBalance.quotient, BIG_INT_ZERO) && (
+            {stakedBalance && JSBI.greaterThan(stakedBalance.quotient, BIG_INT_ZERO) && stakeRewardToken && (
               <ButtonPrimary
                 padding="8px"
                 $borderRadius="8px"
                 as={Link}
-                to={`/uni/${currencyId(currency0)}/${currencyId(currency1)}`}
+                to={`/stake/${currencyId(pair.liquidityToken)}/${currencyId(stakeRewardToken)}`}
                 width="100%"
               >
                 <Trans>Manage Liquidity in Rewards Pool</Trans>

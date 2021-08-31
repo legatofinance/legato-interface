@@ -3,7 +3,7 @@ import { AutoColumn } from '../../components/Column'
 import styled from 'styled-components/macro'
 import { Link } from 'react-router-dom'
 import JSBI from 'jsbi'
-import { Token, CurrencyAmount, Currency } from '@uniswap/sdk-core'
+import { Token, CurrencyAmount, Currency, Fraction } from '@uniswap/sdk-core'
 import { RouteComponentProps } from 'react-router-dom'
 import DoubleCurrencyLogo from '../../components/DoubleLogo'
 import CurrencyLogo from '../../components/CurrencyLogo'
@@ -28,7 +28,7 @@ import { currencyId } from '../../utils/currencyId'
 import { useTotalSupply } from '../../hooks/useTotalSupply'
 import { useV2Pair } from '../../hooks/useV2Pairs'
 import usePrevious from '../../hooks/usePrevious'
-import useUSDCPrice from '../../hooks/useUSDCPrice'
+import useUSDCPrice, { usePriceRatio } from '../../hooks/useUSDCPrice'
 import { BIG_INT_ZERO, BIG_INT_SECONDS_IN_WEEK } from '../../constants/misc'
 import { Trans } from '@lingui/macro'
 import { transparentize } from 'polished'
@@ -103,28 +103,40 @@ export default function Manage({
       stakingInfo?.stakedToken.address === currencyIdA && stakingInfo?.rewardToken.address === currencyIdB
   )[0]
 
+  // detect existing unstaked LP position to show add button if none found
+  const userLiquidityUnstaked = useTokenBalance(account ?? undefined, stakingInfo?.stakedAmount?.currency)
+  const showAddLiquidityButton = Boolean(stakingInfo?.stakedAmount?.equalTo('0') && userLiquidityUnstaked?.equalTo('0'))
+
   const token0 = stakingInfo?.stakedPairTokens?.[0]
   const token1 = stakingInfo?.stakedPairTokens?.[1]
 
   const currency0 = token0 ? unwrappedToken(token0) : undefined
   const currency1 = token1 ? unwrappedToken(token1) : undefined
 
-  // detect existing unstaked LP position to show add button if none found
-  const userLiquidityUnstaked = useTokenBalance(account ?? undefined, stakingInfo?.stakedAmount?.currency)
-  const showAddLiquidityButton = Boolean(stakingInfo?.stakedAmount?.equalTo('0') && userLiquidityUnstaked?.equalTo('0'))
+  // get the color of the token
+  const token = currency0?.isNative ? token1 : currency0 ? token0 : stakingInfo?.stakedToken
+  const WETH = currency0?.isNative ? token0 : currency0 ? token1 : stakingInfo?.stakedToken
 
   // toggle for staking modal and unstaking modal
   const [showStakingModal, setShowStakingModal] = useState(false)
   const [showUnstakingModal, setShowUnstakingModal] = useState(false)
   const [showClaimRewardModal, setShowClaimRewardModal] = useState(false)
 
+  const [isRetrieving, setIsRetrieving] = useState(false)
+
+  const handleClaimRewardModal = useCallback(
+    (retrieve: boolean) => {
+      setIsRetrieving(retrieve)
+      setShowClaimRewardModal(true)
+    },
+    [isRetrieving, setIsRetrieving, setShowClaimRewardModal]
+  )
+
   // fade cards if nothing staked or nothing earned yet
   const disableTop = !stakingInfo?.stakedAmount || stakingInfo?.stakedAmount.equalTo(JSBI.BigInt(0))
-
-  // get the color of the token
-  const token = currency0?.isNative ? token1 : currency0 ? token0 : stakingInfo?.stakedToken
-  const WETH = currency0?.isNative ? token0 : currency0 ? token1 : stakingInfo?.stakedToken
-  const backgroundColor = useColor(token)
+  const claimable = stakingInfo?.unclaimedAmount && JSBI.notEqual(BIG_INT_ZERO, stakingInfo?.unclaimedAmount?.quotient)
+  const retrievable =
+    claimable || (stakingInfo?.unclaimedAmount && JSBI.notEqual(BIG_INT_ZERO, stakingInfo?.unclaimedAmount?.quotient))
 
   const totalSupplyOfStakingToken = useTotalSupply(stakingInfo?.stakedAmount.currency)
   const [, stakingTokenPair] = useV2Pair(...(stakingInfo?.stakedPairTokens ?? []))
@@ -143,6 +155,12 @@ export default function Manage({
       )
     )
   }
+
+  const apy = (
+    usePriceRatio(stakingTokenPair || stakingInfo?.stakedToken, stakingInfo?.rewardToken) ?? new Fraction(1, 1)
+  )
+    .divide(stakingInfo?.apy ?? 1)
+    .invert()
 
   // get the USD value of staked WETH
   const USDPrice = useUSDCPrice(WETH)
@@ -167,6 +185,8 @@ export default function Manage({
       toggleWalletModal()
     }
   }, [account, toggleWalletModal])
+
+  const backgroundColor = useColor(token)
 
   return (
     <PageWrapper gap="lg" justify="center">
@@ -201,13 +221,10 @@ export default function Manage({
         <PoolData>
           <AutoColumn gap="sm">
             <TYPE.body style={{ margin: 0 }}>
-              <Trans>Pool Rate</Trans>
+              <Trans>Pool APY</Trans>
             </TYPE.body>
             <TYPE.body fontSize={24} fontWeight={500}>
-              <Trans>
-                {stakingInfo?.totalRewardRate?.multiply(BIG_INT_SECONDS_IN_WEEK)?.toFixed(0, { groupSeparator: ',' })}{' '}
-                LDOGE / week
-              </Trans>
+              {apy ? <Trans>{apy.toFixed(2)}%</Trans> : '-'}
             </TYPE.body>
           </AutoColumn>
         </PoolData>
@@ -232,7 +249,7 @@ export default function Manage({
                 <TYPE.white fontSize={14}>
                   <Trans>
                     {stakingInfo?.stakedPairTokens
-                      ? `LDOGE-V2 LP tokens are required. Once you&apos;ve added liquidity to the ${currency0?.symbol}-
+                      ? `LDOGE-V2 LP tokens are required. Once you've added liquidity to the ${currency0?.symbol}-
                       ${currency1?.symbol} pool you can stake your liquidity tokens on this page.`
                       : `${stakingInfo?.stakedToken.symbol} tokens are required. Once you&apos;ve bought some
                       you can stake your liquidity tokens on this page.`}
@@ -279,6 +296,7 @@ export default function Manage({
             isOpen={showClaimRewardModal}
             onDismiss={() => setShowClaimRewardModal(false)}
             stakingInfo={stakingInfo}
+            retrieve={isRetrieving}
           />
         </>
       )}
@@ -305,7 +323,7 @@ export default function Manage({
                   <TYPE.white>
                     <Trans>
                       {stakingInfo?.stakedPairTokens
-                        ? `LDOGE-V2 ${currency0?.symbol}-${currency1?.symbol}`
+                        ? `${currency0?.symbol}-${currency1?.symbol}`
                         : `${stakingInfo?.stakedToken.symbol}`}
                     </Trans>
                   </TYPE.white>
@@ -322,12 +340,12 @@ export default function Manage({
                     <Trans>Your unclaimed {stakingInfo?.rewardToken.symbol}</Trans>
                   </TYPE.black>
                 </div>
-                {stakingInfo?.unclaimedAmount && JSBI.notEqual(BIG_INT_ZERO, stakingInfo?.unclaimedAmount?.quotient) && (
+                {claimable && (
                   <ButtonEmpty
                     padding="8px"
                     $borderRadius="8px"
                     width="fit-content"
-                    onClick={() => setShowClaimRewardModal(true)}
+                    onClick={() => handleClaimRewardModal(false)}
                   >
                     <Trans>Claim</Trans>
                   </ButtonEmpty>
@@ -351,7 +369,9 @@ export default function Manage({
                   </span>
 
                   <Trans>
-                    {stakingInfo?.rewardRate?.multiply(BIG_INT_SECONDS_IN_WEEK)?.toFixed(0, { groupSeparator: ',' })}{' '}
+                    {stakingInfo?.userRewardRate
+                      ?.multiply(BIG_INT_SECONDS_IN_WEEK)
+                      ?.toFixed(0, { groupSeparator: ',' })}{' '}
                     {stakingInfo?.rewardToken.symbol} / week
                   </Trans>
                 </TYPE.black>
@@ -364,12 +384,12 @@ export default function Manage({
                     <Trans>Your claimed {stakingInfo?.rewardToken.symbol}</Trans>
                   </TYPE.black>
                 </div>
-                {stakingInfo?.claimedAmount && JSBI.notEqual(BIG_INT_ZERO, stakingInfo?.claimedAmount?.quotient) && (
+                {retrievable && (
                   <ButtonEmpty
                     padding="8px"
                     $borderRadius="8px"
                     width="fit-content"
-                    onClick={() => setShowClaimRewardModal(true)}
+                    onClick={() => handleClaimRewardModal(true)}
                   >
                     <Trans>Retrieve</Trans>
                   </ButtonEmpty>
@@ -396,7 +416,8 @@ export default function Manage({
             ⭐️
           </span>
           <Trans>
-            When you withdraw, the contract will automatically claim {stakingInfo?.rewardToken.symbol} on your behalf!
+            When you withdraw, the contract will automatically retrieve&nbsp;
+            {stakingInfo?.rewardToken.symbol} on your behalf!
             <br />
           </Trans>
           {stakingInfo?.stakedToken.equals(stakingInfo?.rewardToken) && (

@@ -1,6 +1,6 @@
 import { t } from '@lingui/macro'
 import { BigNumber } from '@ethersproject/bignumber'
-import { Token, CurrencyAmount } from '@uniswap/sdk-core'
+import { Token, CurrencyAmount, Fraction } from '@uniswap/sdk-core'
 import { Pair } from '@lambodoge/sdk'
 import JSBI from 'jsbi'
 import { useMemo } from 'react'
@@ -23,6 +23,7 @@ import STAKING_ROUTER_ABI from 'abis/staking-router.json'
 import { abi as IUniswapV2PairABI } from '@uniswap/v2-core/build/IUniswapV2Pair.json'
 import { STAKING_ROUTER_ADDRESS } from 'constants/addresses'
 import { SupportedChainId } from 'constants/chains'
+import { BIG_INT_SECONDS_IN_YEAR } from 'constants/misc'
 
 const PAIR_INTERFACE = new Interface(IUniswapV2PairABI)
 const STAKING_ROUTER_INTERFACE = new Interface(STAKING_ROUTER_ABI)
@@ -50,12 +51,17 @@ export interface StakingInfo {
   // the amount of reward token earned by the active account, or undefined if no account
   claimedAmount: CurrencyAmount<Token>
   // the amount of token distributed per second to all LPs, constant
-  totalRewardRate: CurrencyAmount<Token>
+  apy: Fraction
   // the current amount of token distributed to the active account per second.
   // equivalent to percent of total supply * reward rate
   rewardRate: CurrencyAmount<Token>
+  // the amount of token distributed per second to all LPs, constant
+  totalRewardRate: CurrencyAmount<Token>
+  // the amount of token distributed per second to the active account
+  userRewardRate: CurrencyAmount<Token>
   // calculates a hypothetical amount of token distributed to the active account per second.
   getHypotheticalRewardRate: (
+    rewardToken: Token,
     stakedAmount: CurrencyAmount<Token>,
     totalStakedAmount: CurrencyAmount<Token>,
     totalRewardRate: CurrencyAmount<Token>
@@ -94,6 +100,10 @@ export function useStakingInfo(): StakingInfo[] | undefined {
   const totalRewards = useSingleContractMultipleData(stackingContract, 'getRewardPool', poolId ?? [])
   const unclaimedAmounts = useSingleContractMultipleData(stackingContract, 'estimatedRewards', poolIdAndAccount ?? [])
   const claimedAmounts = useSingleContractMultipleData(stackingContract, 'getUserRewards', poolIdAndAccount ?? [])
+
+  const minStakers = useSingleContractMultipleData(stackingContract, 'getMinStakersForFullReward', poolId ?? [])
+  const minTotalStaked = useSingleContractMultipleData(stackingContract, 'getMinTotalStakedForFullReward', poolId ?? [])
+  const countStakers = useSingleContractMultipleData(stackingContract, 'getCountStakers', poolId ?? [])
 
   const stakedTokensAddresses = useMemo(
     () => listPools.result?.[0].map((pool: Array<MethodArg>) => pool[2]) ?? [],
@@ -140,23 +150,51 @@ export function useStakingInfo(): StakingInfo[] | undefined {
       const totalRewardsState = totalRewards[i]
       const unclaimedAmountState = unclaimedAmounts[i]
       const claimedAmountState = claimedAmounts[i]
+      const minStakersState = minStakers[i]
+      const minTotalStakedState = minTotalStaked[i]
+      const countStakersState = countStakers[i]
       const stakedPairsToken0State = stakedPairsToken0?.[i]
       const stakedPairsToken1State = stakedPairsToken1?.[i]
       const stakedToken = stakedTokens?.[i]
       const rewardToken = rewardTokens?.[i]
 
-      if (!stakedToken || !rewardToken) {
-        console.error('Failed to load staking rewards info')
-        continue
-      }
+      if (!stakedToken || !rewardToken) continue
 
       const getHypotheticalRewardRate = (
+        rewardToken: Token,
         stakedAmount: CurrencyAmount<Token>,
         totalStakedAmount: CurrencyAmount<Token>,
         totalRewardRate: CurrencyAmount<Token>
       ): CurrencyAmount<Token> => {
-        return CurrencyAmount.fromRawAmount(rewardToken, 0)
+        return CurrencyAmount.fromRawAmount(
+          rewardToken,
+          JSBI.greaterThan(totalStakedAmount.quotient, JSBI.BigInt(0))
+            ? JSBI.divide(JSBI.multiply(totalRewardRate.quotient, stakedAmount.quotient), totalStakedAmount.quotient)
+            : JSBI.BigInt(0)
+        )
       }
+
+      let minStakedRewardPercentage = JSBI.divide(
+        JSBI.BigInt(minTotalStakedState?.result?.[0] ?? 1),
+        JSBI.BigInt(totalStakedState?.result?.[0].eq(0) ? 1 : totalStakedState?.result?.[0] ?? 1)
+      )
+      if (JSBI.lessThan(minStakedRewardPercentage, JSBI.BigInt(1))) minStakedRewardPercentage = JSBI.BigInt(1)
+
+      let minStakersRewardPercentage = JSBI.divide(
+        JSBI.BigInt(minStakersState?.result?.[0] ?? 1),
+        JSBI.BigInt(countStakersState?.result?.[0].eq(0) ? 1 : countStakersState?.result?.[0] ?? 1)
+      )
+      if (JSBI.lessThan(minStakersRewardPercentage, JSBI.BigInt(1))) minStakersRewardPercentage = JSBI.BigInt(1)
+
+      const rewardPercentage = JSBI.multiply(minStakersRewardPercentage, minStakedRewardPercentage)
+
+      let apy = JSBI.divide(JSBI.BigInt(listPools.result?.[0][i][6]), JSBI.BigInt(listPools.result?.[0][i][5]))
+      apy = JSBI.multiply(apy, BIG_INT_SECONDS_IN_YEAR)
+      apy = JSBI.multiply(apy, JSBI.BigInt(10_000))
+      apy = JSBI.divide(apy, rewardPercentage)
+      apy = JSBI.divide(apy, JSBI.BigInt(totalStakedState?.result?.[0].eq(0) ? 1 : totalStakedState?.result?.[0] ?? 1))
+      apy = JSBI.subtract(apy, JSBI.BigInt(1))
+      const apyFraction = new Fraction(apy, 100)
 
       const convertedStakedAmount = CurrencyAmount.fromRawAmount(
         stakedToken,
@@ -168,14 +206,14 @@ export function useStakingInfo(): StakingInfo[] | undefined {
         JSBI.BigInt(totalStakedState?.result?.[0] ?? 0)
       )
 
-      const stakedPairTokens: [Token, Token] | undefined =
-        stakedPairsToken0State && stakedPairsToken1State ? [stakedPairsToken0State, stakedPairsToken1State] : undefined
-
       const totalRewardRate = CurrencyAmount.fromFractionalAmount(
         rewardToken,
         JSBI.BigInt(listPools.result?.[0][i][6]),
         JSBI.BigInt(listPools.result?.[0][i][5])
-      )
+      ).divide(rewardPercentage)
+
+      const stakedPairTokens: [Token, Token] | undefined =
+        stakedPairsToken0State && stakedPairsToken1State ? [stakedPairsToken0State, stakedPairsToken1State] : undefined
 
       const unclaimedAmount = CurrencyAmount.fromRawAmount(
         rewardToken,
@@ -192,9 +230,16 @@ export function useStakingInfo(): StakingInfo[] | undefined {
         unclaimedAmount: unclaimedAmount,
         claimedAmount: claimedAmount,
         rewardRate: CurrencyAmount.fromRawAmount(rewardToken, JSBI.BigInt(0)),
-        totalRewardRate: totalRewardRate,
+        apy: apyFraction,
         stakedAmount: convertedStakedAmount,
         totalStakedAmount: convertedTotalStaked,
+        totalRewardRate: totalRewardRate,
+        userRewardRate: getHypotheticalRewardRate(
+          rewardToken,
+          convertedStakedAmount,
+          convertedTotalStaked,
+          totalRewardRate
+        ),
         getHypotheticalRewardRate,
         open: (totalRewardsState?.result?.[0] ?? 0) > 0,
       })
@@ -202,111 +247,6 @@ export function useStakingInfo(): StakingInfo[] | undefined {
 
     return stakingInfos
   }, [listPools])
-
-  // return useMemo(() => {
-  //   if (!chainId || !uni) return []
-  //
-  //   return rewardsAddresses.reduce<StakingInfo[]>((memo, rewardsAddress, index) => {
-  //     // these two are dependent on account
-  //     const balanceState = balances[index]
-  //     const unclaimedAmountState = unclaimedAmounts[index]
-  //
-  //     // these get fetched regardless of account
-  //     const totalSupplyState = totalSupplies[index]
-  //     const rewardRateState = rewardRates[index]
-  //     const periodFinishState = periodFinishes[index]
-  //
-  //     if (
-  //       // these may be undefined if not logged in
-  //       !balanceState?.loading &&
-  //       !unclaimedAmountState?.loading &&
-  //       // always need these
-  //       totalSupplyState &&
-  //       !totalSupplyState.loading &&
-  //       rewardRateState &&
-  //       !rewardRateState.loading &&
-  //       periodFinishState &&
-  //       !periodFinishState.loading
-  //     ) {
-  //       if (
-  //         balanceState?.error ||
-  //         unclaimedAmountState?.error ||
-  //         totalSupplyState.error ||
-  //         rewardRateState.error ||
-  //         periodFinishState.error
-  //       ) {
-  //         console.error('Failed to load staking rewards info')
-  //         return memo
-  //       }
-  //
-  //       // get the LP token
-  //       const tokens = info[index].tokens
-  //       const dummyPair = new Pair(
-  //         CurrencyAmount.fromRawAmount(tokens[0], '0'),
-  //         CurrencyAmount.fromRawAmount(tokens[1], '0')
-  //       )
-  //
-  //       // check for account, if no account set to 0
-  //
-  //       const stakedAmount = CurrencyAmount.fromRawAmount(
-  //         dummyPair.liquidityToken,
-  //         JSBI.BigInt(balanceState?.result?.[0] ?? 0)
-  //       )
-  //       const totalStakedAmount = CurrencyAmount.fromRawAmount(
-  //         dummyPair.liquidityToken,
-  //         JSBI.BigInt(totalSupplyState.result?.[0])
-  //       )
-  //       const totalRewardRate = CurrencyAmount.fromRawAmount(uni, JSBI.BigInt(rewardRateState.result?.[0]))
-  //
-  //       const getHypotheticalRewardRate = (
-  //         stakedAmount: CurrencyAmount<Token>,
-  //         totalStakedAmount: CurrencyAmount<Token>,
-  //         totalRewardRate: CurrencyAmount<Token>
-  //       ): CurrencyAmount<Token> => {
-  //         return CurrencyAmount.fromRawAmount(
-  //           uni,
-  //           JSBI.greaterThan(totalStakedAmount.quotient, JSBI.BigInt(0))
-  //             ? JSBI.divide(JSBI.multiply(totalRewardRate.quotient, stakedAmount.quotient), totalStakedAmount.quotient)
-  //             : JSBI.BigInt(0)
-  //         )
-  //       }
-  //
-  //       const individualRewardRate = getHypotheticalRewardRate(stakedAmount, totalStakedAmount, totalRewardRate)
-  //
-  //       const periodFinishSeconds = periodFinishState.result?.[0]?.toNumber()
-  //       const periodFinishMs = periodFinishSeconds * 1000
-  //
-  //       // compare period end timestamp vs current block timestamp (in seconds)
-  //       const active =
-  //         periodFinishSeconds && currentBlockTimestamp ? periodFinishSeconds > currentBlockTimestamp.toNumber() : true
-  //
-  //       memo.push({
-  //         stakingRewardAddress: rewardsAddress,
-  //         tokens: info[index].tokens,
-  //         periodFinish: periodFinishMs > 0 ? new Date(periodFinishMs) : undefined,
-  //         unclaimedAmount: CurrencyAmount.fromRawAmount(uni, JSBI.BigInt(unclaimedAmountState?.result?.[0] ?? 0)),
-  //         rewardRate: individualRewardRate,
-  //         totalRewardRate: totalRewardRate,
-  //         stakedAmount: stakedAmount,
-  //         totalStakedAmount: totalStakedAmount,
-  //         getHypotheticalRewardRate,
-  //         active,
-  //       })
-  //     }
-  //     return memo
-  //   }, [])
-  // }, [
-  //   balances,
-  //   chainId,
-  //   currentBlockTimestamp,
-  //   unclaimedAmounts,
-  //   info,
-  //   periodFinishes,
-  //   rewardRates,
-  //   rewardsAddresses,
-  //   totalSupplies,
-  //   uni,
-  // ])
 }
 
 export function useTotalUniEarned(): CurrencyAmount<Token> | undefined {

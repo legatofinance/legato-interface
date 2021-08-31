@@ -59,7 +59,7 @@ export default function Earn() {
             <AutoColumn gap="md">
               <RowBetween>
                 <TYPE.white fontWeight={600}>
-                  <Trans>LamboDoge liquidity mining</Trans>
+                  <Trans>LamboDoge staking and liquidity mining</Trans>
                 </TYPE.white>
               </RowBetween>
               <RowBetween>
@@ -73,7 +73,7 @@ export default function Earn() {
                 target="_blank"
               >
                 <TYPE.white fontSize={14}>
-                  <Trans>Read more about LDOGE</Trans>
+                  <Trans>Read more about staking</Trans>
                 </TYPE.white>
               </ExternalLink>
             </AutoColumn>

@@ -262,8 +262,8 @@ export function toV2LiquidityToken([tokenA, tokenB]: [Token, Token]): Token {
     tokenA.chainId,
     computePairAddress({ factoryAddress: V2_FACTORY_ADDRESSES[tokenA.chainId], tokenA, tokenB }),
     18,
-    'LDOGE-V2',
-    'LamboDoge V2'
+    'LDOGE-LP',
+    'LamboDoge Liquidity'
   )
 }
 

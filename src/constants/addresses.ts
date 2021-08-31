@@ -4,7 +4,7 @@ import { SupportedChainId } from './chains'
 type AddressMap = { [chainId: number]: string }
 
 export const LDOGE_ADDRESS: AddressMap = {
-  [SupportedChainId.MAINNET]: '0xa9cC1B71604bce67A3c1ABC7d3Fa8945F28DBd93',
+  [SupportedChainId.MAINNET]: '0xc32c50fa1854d0c8df9032e5887a57aa84783e8a',
   [SupportedChainId.TESTNET]: '0x0a3e884850c9320bc387123ac7e543229ec3d84d',
 }
 
@@ -24,7 +24,7 @@ export const V2_ROUTER_ADDRESS: AddressMap = {
 }
 
 export const STAKING_ROUTER_ADDRESS: AddressMap = {
-  [SupportedChainId.MAINNET]: '0x8d5d89716A126ba954acd66cC04DD9A5Aa380AcC',
+  [SupportedChainId.MAINNET]: '0xd93D3Ba696271F327F72e90397606B60b0059f24',
   [SupportedChainId.TESTNET]: '0x8d5d89716A126ba954acd66cC04DD9A5Aa380AcC',
 }
 

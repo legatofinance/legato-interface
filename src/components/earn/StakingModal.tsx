@@ -22,6 +22,8 @@ import { TransactionResponse } from '@ethersproject/providers'
 import { useTransactionAdder } from '../../state/transactions/hooks'
 import { LoadingView, SubmittedView } from '../ModalViews'
 import { t, Trans } from '@lingui/macro'
+import { unwrappedToken } from '../../utils/unwrappedToken'
+import { BIG_INT_SECONDS_IN_WEEK } from '../../constants/misc'
 
 const HypotheticalRewardRate = styled.div<{ dim: boolean }>`
   display: flex;
@@ -47,6 +49,12 @@ interface StakingModalProps {
 export default function StakingModal({ isOpen, onDismiss, stakingInfo, userLiquidityUnstaked }: StakingModalProps) {
   const { chainId, library } = useActiveWeb3React()
 
+  const token0 = stakingInfo?.stakedPairTokens?.[0]
+  const token1 = stakingInfo?.stakedPairTokens?.[1]
+
+  const currency0 = token0 ? unwrappedToken(token0) : undefined
+  const currency1 = token1 ? unwrappedToken(token1) : undefined
+
   // track and parse user input
   const [typedValue, setTypedValue] = useState('')
   const { parsedAmount, error } = useDerivedStakeInfo(
@@ -59,6 +67,7 @@ export default function StakingModal({ isOpen, onDismiss, stakingInfo, userLiqui
   let hypotheticalRewardRate: CurrencyAmount<Token> = CurrencyAmount.fromRawAmount(stakingInfo.rewardRate.currency, '0')
   if (parsedAmountWrapped?.greaterThan('0')) {
     hypotheticalRewardRate = stakingInfo.getHypotheticalRewardRate(
+      stakingInfo.rewardToken,
       stakingInfo.stakedAmount.add(parsedAmountWrapped),
       stakingInfo.totalStakedAmount.add(parsedAmountWrapped),
       stakingInfo.totalRewardRate
@@ -158,9 +167,12 @@ export default function StakingModal({ isOpen, onDismiss, stakingInfo, userLiqui
             <TYPE.black>
               <Trans>
                 {hypotheticalRewardRate
-                  .multiply((60 * 60 * 24 * 7).toString())
+                  .multiply(BIG_INT_SECONDS_IN_WEEK.toString())
                   .toSignificant(4, { groupSeparator: ',' })}{' '}
-                LDOGE / week
+                {currency0 && currency1
+                  ? `${currency0.symbol}-${currency1.symbol}`
+                  : `${stakingInfo?.stakedToken.symbol}`}{' '}
+                / week
               </Trans>
             </TYPE.black>
           </HypotheticalRewardRate>
@@ -192,7 +204,12 @@ export default function StakingModal({ isOpen, onDismiss, stakingInfo, userLiqui
               <Trans>Depositing {stakingInfo?.stakedPairTokens ? 'Liquidity' : 'Tokens'}</Trans>
             </TYPE.largeHeader>
             <TYPE.body fontSize={20}>
-              <Trans>{parsedAmount?.toSignificant(18)} LDOGE-V2</Trans>
+              <Trans>
+                {parsedAmount?.toSignificant(18)}
+                {currency0 && currency1
+                  ? ` ${currency0.symbol}-${currency1.symbol}`
+                  : ` ${stakingInfo?.stakedToken.symbol}`}
+              </Trans>
             </TYPE.body>
           </AutoColumn>
         </LoadingView>
@@ -204,7 +221,13 @@ export default function StakingModal({ isOpen, onDismiss, stakingInfo, userLiqui
               <Trans>Transaction Submitted</Trans>
             </TYPE.largeHeader>
             <TYPE.body fontSize={20}>
-              <Trans>Deposited {parsedAmount?.toSignificant(4)} LDOGE-V2</Trans>
+              <Trans>
+                Deposited&nbsp;
+                {parsedAmount?.toSignificant(4)}
+                {currency0 && currency1
+                  ? ` ${currency0.symbol}-${currency1.symbol}`
+                  : ` ${stakingInfo?.stakedToken.symbol}`}
+              </Trans>
             </TYPE.body>
           </AutoColumn>
         </SubmittedView>

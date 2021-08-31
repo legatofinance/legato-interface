@@ -14,7 +14,7 @@ import { Break, CardNoise, CardBGImage, CardBGImageAtmosphere } from './styled'
 import { unwrappedToken } from '../../utils/unwrappedToken'
 import { useTotalSupply } from '../../hooks/useTotalSupply'
 import { useV2Pair } from '../../hooks/useV2Pairs'
-import useUSDCPrice from '../../hooks/useUSDCPrice'
+import useUSDCPrice, { usePriceRatio } from '../../hooks/useUSDCPrice'
 import { BIG_INT_SECONDS_IN_WEEK } from '../../constants/misc'
 import { Trans } from '@lingui/macro'
 import { transparentize } from 'polished'
@@ -115,6 +115,10 @@ export default function PoolCard({ stakingInfo }: { stakingInfo: StakingInfo }) 
     )
   }
 
+  const apy = usePriceRatio(stakingTokenPair || stakingInfo?.stakedToken, stakingInfo?.rewardToken)
+    ?.divide(stakingInfo?.apy)
+    .invert()
+
   // get the USD value of staked WETH
   const USDPrice = useUSDCPrice(WETH)
 
@@ -164,18 +168,9 @@ export default function PoolCard({ stakingInfo }: { stakingInfo: StakingInfo }) 
         </RowBetween>
         <RowBetween>
           <TYPE.white>
-            <Trans>Pool rate</Trans>
+            <Trans>Pool APY</Trans>
           </TYPE.white>
-          <TYPE.white>
-            {stakingInfo ? (
-              <Trans>
-                {stakingInfo.totalRewardRate?.multiply(BIG_INT_SECONDS_IN_WEEK)?.toFixed(0, { groupSeparator: ',' })}{' '}
-                {stakingInfo?.rewardToken.symbol} / week
-              </Trans>
-            ) : (
-              '-'
-            )}
-          </TYPE.white>
+          <TYPE.white>{apy ? <Trans>{apy.toFixed(2)}%</Trans> : '-'}</TYPE.white>
         </RowBetween>
       </StatContainer>
 
@@ -195,7 +190,7 @@ export default function PoolCard({ stakingInfo }: { stakingInfo: StakingInfo }) 
               </span>
               {stakingInfo ? (
                 <Trans>
-                  {stakingInfo.rewardRate?.multiply(BIG_INT_SECONDS_IN_WEEK)?.toSignificant(4, { groupSeparator: ',' })}{' '}
+                  {stakingInfo?.userRewardRate?.multiply(BIG_INT_SECONDS_IN_WEEK)?.toFixed(0, { groupSeparator: ',' })}{' '}
                   {stakingInfo?.rewardToken.symbol} / week
                 </Trans>
               ) : (

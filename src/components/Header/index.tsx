@@ -279,7 +279,7 @@ export default function Header() {
           <Trans>Stake</Trans>
         </StyledNavLink>
         <StyledExternalLink id={`stake-nav-link`} href={infoLink}>
-          <Trans>Charts</Trans>
+          <Trans>Chart</Trans>
           <sup>↗</sup>
         </StyledExternalLink>
       </HeaderLinks>

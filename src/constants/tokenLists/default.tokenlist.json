@@ -85,10 +85,10 @@
     {
       "name": "LamboDoge",
       "symbol": "LDOGE",
-      "address": "0xa9cC1B71604bce67A3c1ABC7d3Fa8945F28DBd93",
+      "address": "0xc32c50fa1854d0c8df9032e5887a57aa84783e8a",
       "chainId": 56,
       "decimals": 18,
-      "logoURI": "https://pancakeswap.finance/images/tokens/0xa9cC1B71604bce67A3c1ABC7d3Fa8945F28DBd93.png"
+      "logoURI": "https://pancakeswap.finance/images/tokens/0xc32c50fa1854d0c8df9032e5887a57aa84783e8a.png"
     },
     {
       "name": "Alpaca",

@@ -54,12 +54,6 @@ const StyledMenuButton = styled.button`
   }
 `
 
-const LDOGEbutton = styled(ButtonPrimary)`
-  background-color: ${({ theme }) => theme.bg3};
-  background: radial-gradient(174.47% 188.91% at 1.84% 0%, #ff007a 0%, #2172e5 100%), #edeef2;
-  border: none;
-`
-
 const StyledMenu = styled.div`
   margin-left: 0.5rem;
   display: flex;
@@ -204,7 +198,6 @@ export default function Menu() {
   const toggle = useToggleModal(ApplicationModal.MENU)
   useOnClickOutside(node, open ? toggle : undefined)
   const openClaimModal = useToggleModal(ApplicationModal.ADDRESS_CLAIM)
-  const showLDOGEClaimOption = Boolean(!!account && !!chainId)
   const { infoLink } = CHAIN_INFO[chainId ? chainId : SupportedChainId.MAINNET]
 
   const [darkMode, toggleDarkMode] = useDarkModeManager()
@@ -261,21 +254,6 @@ export default function Menu() {
                     </div>
                     <ChevronRight size={16} opacity={0.6} />
                   </ToggleMenuItem>
-                  <ToggleMenuItem onClick={() => toggleDarkMode()}>
-                    <div>{darkMode ? <Trans>Light Theme</Trans> : <Trans>Dark Theme</Trans>}</div>
-                    {darkMode ? <Moon opacity={0.6} size={16} /> : <Sun opacity={0.6} size={16} />}
-                  </ToggleMenuItem>
-                  {showLDOGEClaimOption && (
-                    <LDOGEbutton
-                      onClick={openClaimModal}
-                      padding="8px 16px"
-                      width="100%"
-                      $borderRadius="12px"
-                      mt="0.5rem"
-                    >
-                      <Trans>Claim LDOGE</Trans>
-                    </LDOGEbutton>
-                  )}
                 </MenuFlyout>
               )
           }

@@ -22,13 +22,13 @@ export const CHAIN_INFO: ChainInfo = {
   [SupportedChainId.MAINNET]: {
     docs: 'https://docs.binance.org/',
     explorer: 'https://bscscan.com/',
-    infoLink: 'https://pancakeswap.info/',
+    infoLink: 'https://poocoin.app/tokens/0xc32c50fa1854d0c8df9032e5887a57aa84783e8a',
     label: 'Mainnet',
   },
   [SupportedChainId.TESTNET]: {
     docs: 'https://docs.uniswap.org/',
     explorer: 'https://testnet.bscscan.com/',
-    infoLink: 'https://pancakeswap.info/',
+    infoLink: 'https://poocoin.app/tokens/0xc32c50fa1854d0c8df9032e5887a57aa84783e8a',
     label: 'Testnet',
   },
 }

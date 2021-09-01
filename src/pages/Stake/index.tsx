@@ -93,7 +93,7 @@ export default function Earn() {
           {!account ? (
             <Card padding="40px">
               <TYPE.body color={theme.text3} textAlign="center">
-                <Trans>Connect to a wallet to view your liquidity.</Trans>
+                <Trans>Connect to a wallet to view the pools.</Trans>
               </TYPE.body>
             </Card>
           ) : !stakingInfos ? (

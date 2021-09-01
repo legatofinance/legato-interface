@@ -81,7 +81,9 @@ export function usePairUSDCPrice(pair?: Pair): Price<Currency, Token> | undefine
             pair.reserve0.quotient,
             JSBI.BigInt(2) // this is b/c the value of LP shares are ~double the value of the WETH they entitle owner to
           ),
-          totalSupplyOfLiquidityToken.quotient
+          JSBI.equal(totalSupplyOfLiquidityToken.quotient, JSBI.BigInt(0))
+            ? JSBI.BigInt(1)
+            : totalSupplyOfLiquidityToken.quotient
         )
       )
     }

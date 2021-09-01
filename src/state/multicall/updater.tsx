@@ -54,10 +54,10 @@ async function fetchChunk(
 
     return returnData
   } catch (error) {
-    if (error.code === -32000 || error.message?.indexOf('header not found') !== -1) {
+    if ((error as any).code === -32000 || (error as any).message?.indexOf('header not found') !== -1) {
       throw new RetryableError(`header not found for block number ${blockNumber}`)
     }
-    console.error('Failed to fetch chunk', error)
+    console.error('Failed to fetch chunk', error as any)
     throw error
   }
 }

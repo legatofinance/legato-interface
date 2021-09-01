@@ -110,7 +110,9 @@ export default function PoolCard({ stakingInfo }: { stakingInfo: StakingInfo }) 
           JSBI.multiply(stakingInfo.totalStakedAmount.quotient, stakingTokenPair.reserveOf(WETH).quotient),
           JSBI.BigInt(2) // this is b/c the value of LP shares are ~double the value of the WETH they entitle owner to
         ),
-        totalSupplyOfStakingToken.quotient
+        JSBI.equal(totalSupplyOfStakingToken.quotient, JSBI.BigInt(0))
+          ? JSBI.BigInt(1)
+          : totalSupplyOfStakingToken.quotient
       )
     )
   }
@@ -160,11 +162,7 @@ export default function PoolCard({ stakingInfo }: { stakingInfo: StakingInfo }) 
           <TYPE.white>
             <Trans>Total deposited</Trans>
           </TYPE.white>
-          <TYPE.white>
-            {valueOfTotalStakedAmountInUSDC
-              ? `$${valueOfTotalStakedAmountInUSDC.toFixed(2, { groupSeparator: ',' })}`
-              : `${valueOfTotalStakedAmountInWETH?.toSignificant(4, { groupSeparator: ',' }) ?? '-'} BNB`}
-          </TYPE.white>
+          <TYPE.white>${valueOfTotalStakedAmountInUSDC?.toFixed(2, { groupSeparator: ',' }) ?? '0.00'}</TYPE.white>
         </RowBetween>
         <RowBetween>
           <TYPE.white>

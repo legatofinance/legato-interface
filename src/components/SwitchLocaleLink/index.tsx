@@ -28,8 +28,8 @@ const useTargetLocale = (activeLocale: SupportedLocale) => {
 }
 
 export function SwitchLocaleLink() {
-  const activeLocale = useActiveLocale()
-  const targetLocale = useTargetLocale(activeLocale)
+  // const activeLocale = useActiveLocale()
+  const targetLocale = null //useTargetLocale(activeLocale)
 
   const { to, onClick } = useLocationLinkProps(targetLocale)
 

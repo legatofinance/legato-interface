@@ -248,12 +248,6 @@ export default function Menu() {
                     </div>
                     <PieChart opacity={0.6} size={16} />
                   </MenuItem>
-                  <ToggleMenuItem onClick={() => setMenu('lang')}>
-                    <div>
-                      <Trans>Language</Trans>
-                    </div>
-                    <ChevronRight size={16} opacity={0.6} />
-                  </ToggleMenuItem>
                 </MenuFlyout>
               )
           }

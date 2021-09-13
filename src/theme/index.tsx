@@ -46,12 +46,12 @@ function colors(darkMode: boolean): Colors {
     text2: darkMode ? '#C3C5CB' : '#565A69',
     text3: darkMode ? '#8F96AC' : '#6E727D',
     text4: darkMode ? '#B2B9D2' : '#C3C5CB',
-    text5: darkMode ? '#2C2F36' : '#EDEEF2',
+    text5: darkMode ? '#222429' : '#EDEEF2',
 
     // backgrounds / greys
-    bg0: darkMode ? '#191B1F' : '#FFF',
-    bg1: darkMode ? '#212429' : '#F7F8FA',
-    bg2: darkMode ? '#2C2F36' : '#EDEEF2',
+    bg0: darkMode ? '#070812' : '#FFF',
+    bg1: darkMode ? '#11131E' : '#F7F8FA',
+    bg2: darkMode ? '#222429' : '#EDEEF2',
     bg3: darkMode ? '#40444F' : '#CED0D9',
     bg4: darkMode ? '#565A69' : '#888D9B',
     bg5: darkMode ? '#6C7284' : '#888D9B',

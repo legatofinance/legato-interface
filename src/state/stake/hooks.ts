@@ -194,6 +194,11 @@ export function useStakingInfo(): StakingInfo[] | undefined {
       apy = JSBI.divide(apy, rewardPercentage)
       apy = JSBI.divide(apy, JSBI.BigInt(totalStakedState?.result?.[0].eq(0) ? 1 : totalStakedState?.result?.[0] ?? 1))
       apy = JSBI.subtract(apy, JSBI.BigInt(1))
+
+      if (totalStakedState?.result?.[0].eq(0) || !totalStakedState?.result?.[0]) {
+        apy = JSBI.multiply(apy, JSBI.BigInt(10))
+      }
+
       const apyFraction = new Fraction(apy, 100)
 
       const convertedStakedAmount = CurrencyAmount.fromRawAmount(

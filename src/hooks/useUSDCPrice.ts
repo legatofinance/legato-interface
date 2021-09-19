@@ -74,17 +74,18 @@ export function usePairUSDCPrice(pair?: Pair): Price<Currency, Token> | undefine
   return useMemo(() => {
     let valueOfOneLiquidityTokenInToken0: CurrencyAmount<Token> | undefined = undefined
     if (pair && totalSupplyOfLiquidityToken) {
-      valueOfOneLiquidityTokenInToken0 = CurrencyAmount.fromRawAmount(
+      valueOfOneLiquidityTokenInToken0 = CurrencyAmount.fromFractionalAmount(
         pair.token0,
         JSBI.divide(
           JSBI.multiply(
-            pair.reserve0.quotient,
-            JSBI.BigInt(2) // this is b/c the value of LP shares are ~double the value of the WETH they entitle owner to
+            pair?.reserve0.quotient,
+            JSBI.BigInt(2 * 10 ** (pair?.token0.decimals ?? 0)) // this is b/c the value of LP shares are ~double the value of the WETH they entitle owner to
           ),
           JSBI.equal(totalSupplyOfLiquidityToken.quotient, JSBI.BigInt(0))
             ? JSBI.BigInt(1)
             : totalSupplyOfLiquidityToken.quotient
-        )
+        ),
+        10 ** (pair?.token0.decimals ?? 0)
       )
     }
 

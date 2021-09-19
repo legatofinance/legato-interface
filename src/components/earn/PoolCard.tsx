@@ -168,7 +168,7 @@ export default function PoolCard({ stakingInfo }: { stakingInfo: StakingInfo }) 
           <TYPE.white>
             <Trans>Pool APY</Trans>
           </TYPE.white>
-          <TYPE.white>{apy ? <Trans>{apy.toFixed(2)}%</Trans> : '-'}</TYPE.white>
+          <TYPE.white>{apy && +apy?.denominator.toString() ? <Trans>{apy.toFixed(2)}%</Trans> : '-'}</TYPE.white>
         </RowBetween>
       </StatContainer>
 

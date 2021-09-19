@@ -231,7 +231,7 @@ function ManageContent({ stakingInfo }: { stakingInfo: StakingInfo }) {
               <Trans>Pool APY</Trans>
             </TYPE.body>
             <TYPE.body fontSize={24} fontWeight={500}>
-              {apy ? <Trans>{apy.toFixed(2)}%</Trans> : '-'}
+              {apy && +apy?.denominator.toString() ? <Trans>{apy.toFixed(2)}%</Trans> : '-'}
             </TYPE.body>
           </AutoColumn>
         </PoolData>

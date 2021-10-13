@@ -1,11 +1,14 @@
 import { useContext } from 'react'
 import JSBI from 'jsbi'
+import { Link } from 'react-router-dom'
 import { AutoColumn } from '../../components/Column'
 import styled, { ThemeContext } from 'styled-components/macro'
 import { useStakingInfo } from '../../state/stake/hooks'
 import { TYPE, ExternalLink } from '../../theme'
+import { Text } from 'rebass'
 import PoolCard from '../../components/earn/PoolCard'
-import { RowBetween } from '../../components/Row'
+import { RowBetween, RowFixed } from '../../components/Row'
+import { ButtonPrimary, ButtonSecondary } from '../../components/Button'
 import { CardSection, DataCard, CardNoise, CardBGImage, CardBGImageAtmosphere } from '../../components/earn/styled'
 import Loader from '../../components/Loader'
 import { useActiveWeb3React } from '../../hooks/web3'
@@ -14,6 +17,8 @@ import { STAKING_ROUTER_ADDRESS } from '../../constants/addresses'
 import Card, { OutlineCard } from '../../components/Card'
 import { currencyId } from '../../utils/currencyId'
 import { Trans } from '@lingui/macro'
+import Select from '../../components/Select'
+import SearchBar from '../../components/SearchBar'
 
 const PageWrapper = styled(AutoColumn)`
   max-width: 640px;
@@ -34,10 +39,94 @@ const PoolSection = styled.div`
   justify-self: center;
 `
 
-const DataRow = styled(RowBetween)`
+const TitleRow = styled(RowBetween)`
   ${({ theme }) => theme.mediaWidth.upToSmall`
-flex-direction: column;
-`};
+    flex-wrap: wrap;
+    gap: 16px;
+    width: 100%;
+
+    & > * {
+      width: 100% !important;
+    }
+  `};
+`
+
+const ButtonRow = styled(RowFixed)`
+  gap: 8px;
+
+  ${({ theme }) => theme.mediaWidth.upToSmall`
+    width: fit-content !important;
+    flex-direction: row-reverse;
+    justify-content: space-between;
+  `};
+`
+
+const ResponsiveButtonPrimary = styled(ButtonPrimary)`
+  width: 150px;
+  height: 40px;
+  border-radius: 8px;
+`
+
+const CheckBoxWrapper = styled.div`
+  position: relative;
+  height: 26px;
+`
+
+const CheckBoxLabel = styled.label`
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 42px;
+  height: 26px;
+  border-radius: 15px;
+  background: ${({ theme }) => theme.bg5};
+  cursor: pointer;
+
+  &::after {
+    content: '';
+    display: block;
+    border-radius: 50%;
+    width: 18px;
+    height: 18px;
+    margin: 4px;
+    background: #ffffff;
+    box-shadow: 1px 3px 3px 1px rgba(0, 0, 0, 0.2);
+    transition: 0.2s;
+  }
+`
+
+const CheckBox = styled.input`
+  opacity: 0;
+  z-index: 1;
+  border-radius: 15px;
+  width: 42px;
+  height: 26px;
+
+  &:checked + ${CheckBoxLabel} {
+    background: ${({ theme }) => theme.primary1};
+
+    &::after {
+      content: '';
+      display: block;
+      border-radius: 50%;
+      width: 18px;
+      height: 18px;
+      margin-left: 21px;
+      transition: 0.2s;
+    }
+  }
+`
+
+const StyledSelect = styled(Select)`
+  ${({ theme }) => theme.mediaWidth.upToSmall`
+    width: 100%;
+  `}
+`
+
+const StyledSearchBar = styled(SearchBar)`
+  ${({ theme }) => theme.mediaWidth.upToSmall`
+    width: 100%;
+  `}
 `
 
 export default function Earn() {
@@ -64,12 +153,12 @@ export default function Earn() {
               </RowBetween>
               <RowBetween>
                 <TYPE.white fontSize={14}>
-                  <Trans>Deposit your Liquidity Provider tokens to receive LDOGE, the LamboDoge protocol token.</Trans>
+                  <Trans>Deposit your tokens to receive interest through the LamboStake protocol.</Trans>
                 </TYPE.white>
               </RowBetween>{' '}
               <ExternalLink
                 style={{ color: 'white', textDecoration: 'underline' }}
-                href="https://lambodoge.org/#innovations"
+                href="https://lambodoge.org/en/blog/introducing-lamboswap/#stake"
                 target="_blank"
               >
                 <TYPE.white fontSize={14}>
@@ -83,11 +172,57 @@ export default function Earn() {
       </TopSection>
 
       <AutoColumn gap="lg" style={{ width: '100%', maxWidth: '720px' }}>
-        <DataRow style={{ alignItems: 'baseline' }}>
-          <TYPE.mediumHeader style={{ marginTop: '0.5rem' }}>
-            <Trans>Participating pools</Trans>
+        <TitleRow style={{ alignItems: 'center' }}>
+          <TYPE.mediumHeader>
+            <Trans>Staking board</Trans>
           </TYPE.mediumHeader>
-        </DataRow>
+          <ButtonRow>
+            <Text opacity={0.6} fontWeight={500} fontSize={16}>
+              Hide empty deposit
+            </Text>
+            <CheckBoxWrapper>
+              <CheckBox id="checkbox" type="checkbox" />
+              <CheckBoxLabel htmlFor="checkbox" />
+            </CheckBoxWrapper>
+          </ButtonRow>
+        </TitleRow>
+
+        <TitleRow style={{ alignItems: 'flex-end' }}>
+          <AutoColumn gap="sm">
+            <TYPE.white fontSize={14} style={{ marginLeft: '8px' }}>
+              Sort by:
+            </TYPE.white>
+            <StyledSelect
+              options={[
+                {
+                  label: 'APY',
+                  value: 0,
+                },
+                {
+                  label: 'TVL',
+                  value: 1,
+                },
+                {
+                  label: 'Date of creation',
+                  value: 2,
+                },
+              ]}
+            />
+          </AutoColumn>
+
+          <AutoColumn gap="sm">
+            <TYPE.white fontSize={14} style={{ marginLeft: '8px' }}>
+              Search:
+            </TYPE.white>
+            <StyledSearchBar placeholder="Search pools" onTextChange={(text) => console.log(text)} />
+          </AutoColumn>
+
+          <ResponsiveButtonPrimary id="create-pool-button" as={Link} to="/stake/create" padding="6px 8px">
+            <Text fontWeight={500} fontSize={16}>
+              Create pool
+            </Text>
+          </ResponsiveButtonPrimary>
+        </TitleRow>
 
         <PoolSection>
           {!account ? (

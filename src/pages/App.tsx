@@ -19,6 +19,7 @@ import RemoveLiquidity from './RemoveLiquidity'
 import Swap from './Swap'
 import { RedirectPathToSwapOnly, RedirectToSwap } from './Swap/redirects'
 import Stake from './Stake'
+import CreateStakingPool from './CreateStakingPool'
 
 const AppWrapper = styled.div`
   display: flex;
@@ -71,6 +72,8 @@ export default function App() {
               <Route exact strict path="/stake" component={Stake} />
               <Route exact strict path="/stake" component={Earn} />
               <Route exact strict path="/stake/:currencyIdA/:currencyIdB" component={Manage} />
+
+              <Route exact strict path="/stake/create" component={CreateStakingPool} />
 
               <Route exact strict path="/send" component={RedirectPathToSwapOnly} />
               <Route exact strict path="/swap/:outputCurrency" component={RedirectToSwap} />

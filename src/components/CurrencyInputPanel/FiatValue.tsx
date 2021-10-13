@@ -24,10 +24,11 @@ export function FiatValue({
   }, [priceImpact, theme.green1, theme.red1, theme.text3, theme.yellow1])
 
   return (
-    <TYPE.body fontSize={14} color={fiatValue ? theme.text2 : theme.text4}>
+    <TYPE.body fontSize={14} color={fiatValue ? theme.text2 : theme.text4} style={{ display: 'flex' }}>
       {fiatValue ? (
         <Trans>
-          ~$ <HoverInlineText text={fiatValue?.toSignificant(6, { groupSeparator: ',' })} />
+          ~$&nbsp;
+          <HoverInlineText text={fiatValue?.toSignificant(6, { groupSeparator: ',' })} />
         </Trans>
       ) : (
         ''

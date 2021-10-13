@@ -12,13 +12,12 @@ const StyledInput = styled.input<{ error?: boolean; fontSize?: string; align?: s
   flex: 1 1 auto;
   background-color: ${({ theme }) => theme.bg1};
   font-size: ${({ fontSize }) => fontSize ?? '24px'};
-  text-align: ${({ align }) => align && align};
+  text-align: ${({ align }) => align ?? 'right'};
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
   padding: 0px;
   -webkit-appearance: textfield;
-  text-align: right;
 
   ::-webkit-search-decoration {
     -webkit-appearance: none;
@@ -51,7 +50,7 @@ export const Input = React.memo(function InnerInput({
   onUserInput: (input: string) => void
   error?: boolean
   fontSize?: string
-  align?: 'right' | 'left'
+  align?: 'right' | 'left' | 'center'
   prependSymbol?: string | undefined
 } & Omit<React.HTMLProps<HTMLInputElement>, 'ref' | 'onChange' | 'as'>) {
   const enforcer = (nextUserInput: string) => {

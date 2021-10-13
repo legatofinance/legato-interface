@@ -9,7 +9,7 @@ import { ExternalLink, TYPE, HideSmall } from '../../theme'
 import { Text } from 'rebass'
 import Card from '../../components/Card'
 import { RowBetween, RowFixed } from '../../components/Row'
-import { ButtonPrimary, ButtonSecondary } from '../../components/Button'
+import { ButtonPrimary } from '../../components/Button'
 
 import { AutoColumn } from '../../components/Column'
 
@@ -56,13 +56,6 @@ const ButtonRow = styled(RowFixed)`
 const ResponsiveButtonPrimary = styled(ButtonPrimary)`
   width: fit-content;
   border-radius: 12px;
-  ${({ theme }) => theme.mediaWidth.upToSmall`
-    width: 48%;
-  `};
-`
-
-const ResponsiveButtonSecondary = styled(ButtonSecondary)`
-  width: fit-content;
   ${({ theme }) => theme.mediaWidth.upToSmall`
     width: 48%;
   `};
@@ -155,7 +148,7 @@ export default function Pool() {
               <ExternalLink
                 style={{ color: 'white', textDecoration: 'underline' }}
                 target="_blank"
-                href="https://docs.pancakeswap.finance/products/pancakeswap-exchange/liquidity-guide"
+                href="https://lambodoge.org/en/blog/lambostake-v2/"
               >
                 <TYPE.white fontSize={14}>
                   <Trans>Read more about providing liquidity</Trans>
@@ -175,9 +168,6 @@ export default function Pool() {
                 </TYPE.mediumHeader>
               </HideSmall>
               <ButtonRow>
-                <ResponsiveButtonSecondary as={Link} padding="6px 8px" to="/add/BNB">
-                  <Trans>Create a pair</Trans>
-                </ResponsiveButtonSecondary>
                 <ResponsiveButtonPrimary id="find-pool-button" as={Link} to="/pool/find" padding="6px 8px">
                   <Text fontWeight={500} fontSize={16}>
                     <Trans>Import Pool</Trans>

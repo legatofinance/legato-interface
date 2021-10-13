@@ -11,6 +11,7 @@ import lists from './lists/reducer'
 import burn from './burn/reducer'
 import logs from './logs/slice'
 import multicall from './multicall/reducer'
+import stakeV2 from './stake/v2/reducer'
 
 const PERSISTED_KEYS: string[] = ['user', 'transactions', 'lists']
 
@@ -25,6 +26,7 @@ const store = configureStore({
     multicall,
     lists,
     logs,
+    stakeV2,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({ thunk: true }).concat(save({ states: PERSISTED_KEYS, debounce: 1000 })),

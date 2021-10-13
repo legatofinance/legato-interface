@@ -5,18 +5,12 @@ export interface MintState {
   readonly independentField: Field
   readonly typedValue: string
   readonly otherTypedValue: string // for the case when there's no liquidity
-  readonly startPriceTypedValue: string // for the case when there's no liquidity
-  readonly leftRangeTypedValue: string
-  readonly rightRangeTypedValue: string
 }
 
 export const initialState: MintState = {
   independentField: Field.CURRENCY_A,
   typedValue: '',
   otherTypedValue: '',
-  startPriceTypedValue: '',
-  leftRangeTypedValue: '',
-  rightRangeTypedValue: '',
 }
 
 export default createReducer<MintState>(initialState, (builder) =>

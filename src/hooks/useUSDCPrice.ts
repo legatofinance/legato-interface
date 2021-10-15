@@ -7,6 +7,14 @@ import { USDC } from '../constants/tokens'
 import { useV2TradeExactOut } from './useV2Trade'
 import { useActiveWeb3React } from './web3'
 import { useTotalSupply } from './useTotalSupply'
+import { usePairContract } from './useContract'
+import { useV2Pair } from './useV2Pairs'
+import { useMultipleContractSingleData, NEVER_RELOAD } from 'state/multicall/hooks'
+import { useTokens } from 'hooks/Tokens'
+import { Interface } from '@ethersproject/abi'
+import { abi as IUniswapV2PairABI } from '@uniswap/v2-core/build/IUniswapV2Pair.json'
+
+const PAIR_INTERFACE = new Interface(IUniswapV2PairABI)
 
 // Stablecoin amounts used when calculating spot price for a given currency.
 // The amount is large enough to filter low liquidity pairs.
@@ -50,7 +58,38 @@ export default function useUSDCPrice(currency?: Currency): Price<Currency, Token
 }
 
 export function useUSDCValue(currencyAmount: CurrencyAmount<Currency> | undefined | null) {
-  const price = useUSDCPrice(currencyAmount?.currency)
+  const pairContract = usePairContract()
+
+  const token = currencyAmount?.currency?.wrapped
+
+  const pairsToken0Addresses = useMultipleContractSingleData(
+    [token?.address],
+    PAIR_INTERFACE,
+    'token0',
+    undefined,
+    NEVER_RELOAD
+  )
+  const pairsToken1Addresses = useMultipleContractSingleData(
+    [token?.address],
+    PAIR_INTERFACE,
+    'token1',
+    undefined,
+    NEVER_RELOAD
+  )
+
+  const pairsToken0 = useTokens(
+    pairsToken0Addresses.map((pairsToken0Address) => pairsToken0Address.result?.[0] ?? undefined)
+  )
+  const pairsToken1 = useTokens(
+    pairsToken1Addresses.map((pairsToken1Address) => pairsToken1Address.result?.[0] ?? undefined)
+  )
+
+  const [, pair] = useV2Pair(pairsToken0?.[0] ?? undefined, pairsToken1?.[0] ?? undefined)
+
+  const tokenPrice = useUSDCPrice(currencyAmount?.currency)
+  const pairPrice = usePairUSDCPrice(pair ?? undefined)
+
+  const price = pairPrice ?? tokenPrice
 
   return useMemo(() => {
     if (!price || !currencyAmount) return null

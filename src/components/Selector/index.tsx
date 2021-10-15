@@ -14,33 +14,37 @@ const ResponsiveText = styled(TYPE.label)`
   `};
 `
 
-export default function LiquidityMiningSelector({
-  liquidityMining,
-  handleLiquidityMiningSelect,
+export default function Selector({
+  selected,
+  handleSelection,
+  titles,
+  descriptions,
 }: {
-  liquidityMining: boolean
-  handleLiquidityMiningSelect: (liquidityMining: boolean) => void
+  selected: boolean
+  handleSelection: (active: boolean) => void
+  titles: [string, string]
+  descriptions: [string, string]
 }) {
   return (
     <RowBetween>
-      <ButtonRadioChecked width="48%" active={!liquidityMining} onClick={() => handleLiquidityMiningSelect(false)}>
+      <ButtonRadioChecked width="48%" active={!selected} onClick={() => handleSelection(false)}>
         <AutoColumn justify="flex-start" gap="6px">
           <ResponsiveText>
-            <Trans>Classic Staking</Trans>
+            <Trans>{titles[0]}</Trans>
           </ResponsiveText>
           <TYPE.main fontWeight={400} fontSize="12px" textAlign="left">
-            <Trans>Incentivize holding</Trans>
+            <Trans>{descriptions[0]}</Trans>
           </TYPE.main>
         </AutoColumn>
       </ButtonRadioChecked>
 
-      <ButtonRadioChecked width="48%" active={liquidityMining} onClick={() => handleLiquidityMiningSelect(true)}>
+      <ButtonRadioChecked width="48%" active={selected} onClick={() => handleSelection(true)}>
         <AutoColumn justify="flex-start" gap="6px">
           <ResponsiveText>
-            <Trans>Liquidity mining</Trans>
+            <Trans>{titles[1]}</Trans>
           </ResponsiveText>
           <TYPE.main fontWeight={400} fontSize="12px" textAlign="left">
-            <Trans>Incentivize liquidity providing</Trans>
+            <Trans>{descriptions[1]}</Trans>
           </TYPE.main>
         </AutoColumn>
       </ButtonRadioChecked>

@@ -6,6 +6,16 @@ import { RowBetween } from 'components/Row'
 import { AutoColumn } from 'components/Column'
 import CurrencyInputPanel from 'components/CurrencyInputPanel'
 
+export const ScrollablePage = styled.div`
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  ${({ theme }) => theme.mediaWidth.upToMedium`
+    max-width: 480px;
+    margin: 0 auto;
+  `};
+`
+
 export const PageWrapper = styled(BodyWrapper)<{ wide: boolean }>`
   max-width: ${({ wide }) => (wide ? '880px' : '480px')};
   width: 100%;

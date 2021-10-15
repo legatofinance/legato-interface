@@ -1,9 +1,13 @@
 import styled from 'styled-components/macro'
 
-const Column = styled.div`
+const Column = styled.div<{
+  gap?: 'sm' | 'md' | 'lg' | string
+  justify?: 'stretch' | 'center' | 'start' | 'end' | 'flex-start' | 'flex-end' | 'space-between'
+}>`
   display: flex;
   flex-direction: column;
-  justify-content: flex-start;
+  justify-content: ${({ justify }) => justify ?? 'flex-start'};
+  gap: ${({ gap }) => (gap === 'sm' && '8px') || (gap === 'md' && '12px') || (gap === 'lg' && '24px') || gap};
 `
 export const ColumnCenter = styled(Column)`
   width: 100%;

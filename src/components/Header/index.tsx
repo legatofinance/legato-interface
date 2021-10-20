@@ -170,9 +170,12 @@ const Title = styled.a`
 `
 
 const UniIcon = styled.div`
-  transition: transform 0.3s ease;
-  :hover {
-    transform: rotate(-5deg);
+  img {
+    transition: transform 0.3s ease;
+  }
+
+  &:hover img {
+    transform: rotate(60deg);
   }
 `
 
@@ -255,7 +258,7 @@ export default function Header() {
       </Modal>
       <Title href=".">
         <UniIcon>
-          <img width={'24px'} src={darkMode ? LogoDark : Logo} alt="logo" />
+          <img width={'32px'} src={darkMode ? LogoDark : Logo} alt="logo" />
         </UniIcon>
       </Title>
       <HeaderLinks>

@@ -35,6 +35,7 @@ import { useWalletModalToggle } from 'state/application/hooks'
 import TransactionConfirmationModal, { ConfirmationModalContent } from '../../components/TransactionConfirmationModal'
 import useTransactionDeadline from '../../hooks/useTransactionDeadline'
 import Review from './Review'
+import { SP_MAKER_BNB_FEE, SP_MAKER_STAKING_TAX, SP_MAKER_UNSTAKING_TAX } from 'constants/misc'
 
 const StyledHistoryLink = styled(HistoryLink)<{ flex: string | undefined }>`
   flex: ${({ flex }) => flex ?? 'none'};
@@ -282,9 +283,21 @@ export default function CreateStakingPool() {
         hash={txHash}
         content={() => (
           <ConfirmationModalContent
-            title={<Trans>Create pool</Trans>}
+            title={<Trans>Create staking pool</Trans>}
             onDismiss={handleDismissConfirmation}
-            topContent={() => <Review />}
+            topContent={() => (
+              <Review
+                currencyStaked={currencyToStake}
+                currencyReward={currencies[Field.CURRENCY_REWARD]}
+                pairToStake={pairToStake}
+                totalRewardAmount={parsedAmounts[Field.CURRENCY_REWARD]}
+                minimumToStake={parsedAmounts[Field.MINIMUM_STAKED]}
+                minimumTotalStaked={parsedAmounts[Field.MINIMUM_TOTAL_STAKED]}
+                minimumStakers={minimumStakers}
+                poolLifespan={poolLifespan}
+                tax={tax}
+              />
+            )}
             bottomContent={() => (
               <ButtonPrimary style={{ marginTop: '1rem' }} onClick={onCreate}>
                 <Text fontWeight={500} fontSize={20}>
@@ -510,12 +523,17 @@ export default function CreateStakingPool() {
                 <Selector
                   selected={tax}
                   handleSelection={handleTaxSelect}
-                  titles={['No tax', '2% / 4%']}
+                  titles={['No tax', `${SP_MAKER_STAKING_TAX.toFixed(0)}% / ${SP_MAKER_UNSTAKING_TAX.toFixed(0)}%`]}
                   descriptions={['Better for low APYs', 'Incentivize holding more']}
                 />
               </DynamicSection>
-              <Column style={{ marginTop: '20px' }}>
+
+              <Column gap="md" style={{ marginTop: '20px' }}>
                 <Buttons />
+
+                <TYPE.body fontSize={14} color={theme.text1} textAlign="center">
+                  Pool creation fee: <strong>{SP_MAKER_BNB_FEE.toFixed(2)} BNB</strong>
+                </TYPE.body>
               </Column>
             </RightContainer>
           </ResponsiveTwoColumns>

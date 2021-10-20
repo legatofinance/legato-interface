@@ -1,4 +1,5 @@
-import { Percent } from '@uniswap/sdk-core'
+import { Percent, CurrencyAmount, Ether } from '@uniswap/sdk-core'
+import { SupportedChainId } from './chains'
 import JSBI from 'jsbi'
 
 export const ZERO_ADDRESS = '0x0000000000000000000000000000000000000000'
@@ -34,3 +35,9 @@ export const ZERO_PERCENT = new Percent('0')
 export const ONE_HUNDRED_PERCENT = new Percent('1')
 
 export const IS_ON_APP_URL = window && window.location.hostname === 'app.lambodoge.org'
+
+const WEI_DENOM = JSBI.exponentiate(JSBI.BigInt(10), JSBI.BigInt(18))
+
+export const SP_MAKER_BNB_FEE = CurrencyAmount.fromRawAmount(Ether.onChain(SupportedChainId.MAINNET), WEI_DENOM) // 1 BNB
+export const SP_MAKER_STAKING_TAX = new Percent(JSBI.BigInt(200), BIPS_BASE) // 2%
+export const SP_MAKER_UNSTAKING_TAX = new Percent(JSBI.BigInt(400), BIPS_BASE) // 4%

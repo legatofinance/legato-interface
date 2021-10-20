@@ -28,6 +28,11 @@ export const STAKING_ROUTER_ADDRESS: AddressMap = {
   [SupportedChainId.TESTNET]: '0x8d5d89716A126ba954acd66cC04DD9A5Aa380AcC',
 }
 
+export const V2_STAKING_ROUTER_ADDRESS: AddressMap = {
+  [SupportedChainId.MAINNET]: '0x6af14fbf50a3bd2dd3a12cdc114d80fa77ed47d4',
+  [SupportedChainId.TESTNET]: '0x6af14fbf50a3bd2dd3a12cdc114d80fa77ed47d4',
+}
+
 export const TIMELOCK_ADDRESS: AddressMap = constructSameAddressMap('0x1a9C8182C09F50C8318d769245beA52c32BE35BC')
 
 export const MERKLE_DISTRIBUTOR_ADDRESS: AddressMap = {

@@ -7,7 +7,7 @@ import { Pair } from '@lambodoge/sdk'
 import JSBI from 'jsbi'
 
 import { useV2Pair } from 'hooks/useV2Pairs'
-import { useCurrencyBalances } from '../../wallet/hooks'
+import { useCurrencyBalances, useETHBalances } from '../../wallet/hooks'
 import { tryParseAmount } from '../../swap/hooks'
 import {
   Field,
@@ -17,6 +17,7 @@ import {
   typeMinimumTotalStaked,
   typeMinimumStakers,
 } from './actions'
+import { SP_MAKER_BNB_FEE } from 'constants/misc'
 
 export function useV2StakeState(): AppState['stakeV2'] {
   return useAppSelector((state) => state.stakeV2)
@@ -178,6 +179,12 @@ export function useV2DerivedStakeInfo(
 
   if (rewardBalance && rewardAmount && rewardBalance.lessThan(rewardAmount)) {
     errorMessage = `Insufficient ${rewardBalance.currency.symbol} balance`
+  }
+
+  const bnbBalance = useETHBalances(account ? [account] : [])?.[account ?? '']
+
+  if (bnbBalance && bnbBalance.lessThan(SP_MAKER_BNB_FEE)) {
+    errorMessage = `Insufficient BNB balance`
   }
 
   return {

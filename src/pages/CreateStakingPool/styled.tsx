@@ -43,7 +43,7 @@ export const Wrapper = styled.div`
 export const ResponsiveTwoColumns = styled.div<{ wide: boolean }>`
   display: grid;
   grid-column-gap: 50px;
-  grid-row-gap: 15px;
+  grid-row-gap: 50px;
   grid-template-columns: ${({ wide }) => (wide ? '1fr 1fr' : '1fr')};
   grid-template-rows: max-content;
   grid-auto-flow: row;

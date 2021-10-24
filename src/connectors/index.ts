@@ -44,6 +44,6 @@ export const walletconnect = new WalletConnectConnector({
 // mainnet only
 export const walletlink = new WalletLinkConnector({
   url: NETWORK_URLS[SupportedChainId.MAINNET],
-  appName: 'LamboDoge',
+  appName: 'LegatoFinance',
   appLogoUrl: LDOGESWAP_LOGO_URL,
 })

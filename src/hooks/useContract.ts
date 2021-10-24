@@ -6,6 +6,7 @@ import { abi as IUniswapV2Router02ABI } from '@uniswap/v2-periphery/build/IUnisw
 import { abi as MulticallABI } from '@uniswap/v3-periphery/artifacts/contracts/lens/UniswapInterfaceMulticall.sol/UniswapInterfaceMulticall.json'
 
 import STAKING_ROUTER_ABI from 'abis/staking-router.json'
+import V2_STAKING_ROUTER_ABI from 'abis/v2-staking-router.json'
 import ARGENT_WALLET_DETECTOR_ABI from 'abis/argent-wallet-detector.json'
 import ENS_PUBLIC_RESOLVER_ABI from 'abis/ens-public-resolver.json'
 import ENS_ABI from 'abis/ens-registrar.json'
@@ -16,6 +17,7 @@ import EIP_2612 from 'abis/eip_2612.json'
 
 import {
   STAKING_ROUTER_ADDRESS,
+  V2_STAKING_ROUTER_ADDRESS,
   ARGENT_WALLET_DETECTOR_ADDRESS,
   MERKLE_DISTRIBUTOR_ADDRESS,
   MULTICALL_ADDRESS,
@@ -104,4 +106,8 @@ export function useUniContract() {
 
 export function useStakingContract(withSignerIfPossible?: boolean) {
   return useContract(STAKING_ROUTER_ADDRESS, STAKING_ROUTER_ABI, withSignerIfPossible)
+}
+
+export function useV2StakingContract(withSignerIfPossible?: boolean) {
+  return useContract(V2_STAKING_ROUTER_ADDRESS, V2_STAKING_ROUTER_ABI, withSignerIfPossible)
 }

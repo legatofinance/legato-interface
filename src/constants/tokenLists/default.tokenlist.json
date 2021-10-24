@@ -1,5 +1,5 @@
 {
-  "name": "LamboDoge Default List",
+  "name": "Legato Default List",
   "timestamp": "2021-05-06T00:00:00Z",
   "version": {
     "major": 3,
@@ -8,7 +8,7 @@
   },
   "tags": {},
   "logoURI": "https://pancakeswap.finance/logo.png",
-  "keywords": ["lambodoge", "default"],
+  "keywords": ["legato", "default"],
   "tokens": [
     {
       "name": "WBNB Token",
@@ -83,7 +83,7 @@
       "logoURI": "https://pancakeswap.finance/images/tokens/0xc9849e6fdb743d08faee3e34dd2d1bc69ea11a51.png"
     },
     {
-      "name": "LamboDoge",
+      "name": "Legato",
       "symbol": "LDOGE",
       "address": "0xc32c50fa1854d0c8df9032e5887a57aa84783e8a",
       "chainId": 56,

@@ -148,17 +148,17 @@ export default function Earn() {
             <AutoColumn gap="md">
               <RowBetween>
                 <TYPE.white fontWeight={600}>
-                  <Trans>LamboDoge staking and liquidity mining</Trans>
+                  <Trans>Legato staking and liquidity mining</Trans>
                 </TYPE.white>
               </RowBetween>
               <RowBetween>
                 <TYPE.white fontSize={14}>
-                  <Trans>Deposit your tokens to receive interest through the LamboStake protocol.</Trans>
+                  <Trans>Deposit your tokens to receive interest through the Legato protocol.</Trans>
                 </TYPE.white>
               </RowBetween>{' '}
               <ExternalLink
                 style={{ color: 'white', textDecoration: 'underline' }}
-                href="https://lambodoge.org/en/blog/introducing-lamboswap/#stake"
+                href="https://legato.finance/en/blog/introducing-legatoswap/#stake"
                 target="_blank"
               >
                 <TYPE.white fontSize={14}>

@@ -2,7 +2,7 @@ import { Currency } from '@uniswap/sdk-core'
 import React, { useMemo } from 'react'
 import styled from 'styled-components/macro'
 import BinanceLogo from '../../assets/images/binance-logo.png'
-import LambodogeLogo from '../../assets/images/lambodoge-logo.png'
+import LegatoLogo from '../../assets/images/legato-logo.png'
 import useHttpLocations from '../../hooks/useHttpLocations'
 import { WrappedTokenInfo } from '../../state/lists/wrappedTokenInfo'
 import { SupportedChainId } from 'constants/chains'
@@ -55,7 +55,7 @@ export default function CurrencyLogo({
   if (currency?.isNative) {
     return <StyledBinanceLogo src={BinanceLogo} size={size} style={style} {...rest} />
   } else if (currency?.equals(LDOGE[SupportedChainId.MAINNET]) || currency?.equals(LDOGE[SupportedChainId.TESTNET])) {
-    return <StyledBinanceLogo src={LambodogeLogo} size={size} style={style} {...rest} />
+    return <StyledBinanceLogo src={LegatoLogo} size={size} style={style} {...rest} />
   }
 
   return <StyledLogo size={size} srcs={srcs} alt={`${currency?.symbol ?? 'token'} logo`} style={style} {...rest} />

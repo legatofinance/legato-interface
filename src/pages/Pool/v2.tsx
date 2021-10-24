@@ -148,7 +148,7 @@ export default function Pool() {
               <ExternalLink
                 style={{ color: 'white', textDecoration: 'underline' }}
                 target="_blank"
-                href="https://lambodoge.org/en/blog/lambostake-v2/"
+                href="https://legato.finance/en/blog/legatostake-v2/"
               >
                 <TYPE.white fontSize={14}>
                   <Trans>Read more about providing liquidity</Trans>

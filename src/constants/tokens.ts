@@ -78,14 +78,14 @@ export const LDOGE: { [chainId: number]: Token } = {
     LDOGE_ADDRESS[SupportedChainId.MAINNET],
     18,
     'LDOGE',
-    'LamboDoge'
+    'Legato'
   ),
   [SupportedChainId.TESTNET]: new Token(
     SupportedChainId.TESTNET,
     LDOGE_ADDRESS[SupportedChainId.TESTNET],
     18,
     'LDOGE',
-    'LamboDoge'
+    'Legato'
   ),
 }
 

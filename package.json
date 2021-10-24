@@ -1,6 +1,6 @@
 {
   "name": "@uniswap/interface",
-  "description": "LamboDoge Interface",
+  "description": "Legato Finance Interface",
   "homepage": ".",
   "private": true,
   "devDependencies": {

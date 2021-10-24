@@ -11,6 +11,7 @@ export const DEFAULT_DEADLINE_FROM_NOW = 60 * 30
 export const L2_DEADLINE_FROM_NOW = 60 * 5
 
 // used for rewards deadlines
+export const BIG_INT_SECONDS_IN_DAY = JSBI.BigInt(60 * 60 * 24)
 export const BIG_INT_SECONDS_IN_WEEK = JSBI.BigInt(60 * 60 * 24 * 7)
 export const BIG_INT_SECONDS_IN_YEAR = JSBI.BigInt(60 * 60 * 24 * 365)
 
@@ -34,10 +35,11 @@ export const BETTER_TRADE_LESS_HOPS_THRESHOLD = new Percent(JSBI.BigInt(50), BIP
 export const ZERO_PERCENT = new Percent('0')
 export const ONE_HUNDRED_PERCENT = new Percent('1')
 
-export const IS_ON_APP_URL = window && window.location.hostname === 'app.lambodoge.org'
+export const IS_ON_APP_URL = window && window.location.hostname === 'app.legato.finance'
 
 const WEI_DENOM = JSBI.exponentiate(JSBI.BigInt(10), JSBI.BigInt(18))
 
 export const SP_MAKER_BNB_FEE = CurrencyAmount.fromRawAmount(Ether.onChain(SupportedChainId.MAINNET), WEI_DENOM) // 1 BNB
 export const SP_MAKER_STAKING_TAX = new Percent(JSBI.BigInt(200), BIPS_BASE) // 2%
 export const SP_MAKER_UNSTAKING_TAX = new Percent(JSBI.BigInt(400), BIPS_BASE) // 4%
+export const SP_MAKER_PERIOD = JSBI.BigInt(60)

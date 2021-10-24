@@ -160,7 +160,7 @@ const ToggleMenuItem = styled.button`
   }
 `
 
-const CODE_LINK = 'https://github.com/LamboDoge/lambodoge-interface'
+const CODE_LINK = 'https://github.com/LegatoFinance/legato-interface'
 
 function LanguageMenuItem({ locale, active, key }: { locale: SupportedLocale; active: boolean; key: string }) {
   const { to, onClick } = useLocationLinkProps(locale)
@@ -224,7 +224,7 @@ export default function Menu() {
             default:
               return (
                 <MenuFlyout>
-                  <MenuItem href="https://lambodoge.org/">
+                  <MenuItem href="https://legato.finance/">
                     <div>
                       <Trans>About</Trans>
                     </div>
@@ -236,7 +236,7 @@ export default function Menu() {
                     </div>
                     <Code opacity={0.6} size={16} />
                   </MenuItem>
-                  <MenuItem href="https://t.me/LamboDogeEN">
+                  <MenuItem href="https://t.me/LegatoFinanceEN">
                     <div>
                       <Trans>Telegram</Trans>
                     </div>

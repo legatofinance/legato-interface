@@ -1,8 +1,8 @@
-# LamboDoge Interface
+# Legato Finance Interface
 
-An open source interface for LamboDoge -- a protocol for decentralized exchange of Binance Smart Chain tokens.
+An open source interface for Legato -- a DeFi protocol for Binance Smart Chain tokens.
 
-- Website: [lambodoge.org](https://lambodoge.org/)
-- Application: [app.lambodoge.org](https://app.lambodoge.org)
-- Email: [lambodoge.token@gmail.com](mailto:lambodoge.token@gmail.com)
-- Telegram: [LamboDoge](https://t.me/LamboDogeEN)
+- Website: [legato.finance](https://legato.finance/)
+- Application: [app.legato.finance](https://app.legato.finance)
+- Email: [admin@legato.finance](mailto:admin@legato.finance)
+- Telegram: [Legato (EN) Official](https://t.me/LegatoFinanceEN)

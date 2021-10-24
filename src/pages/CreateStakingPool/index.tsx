@@ -1,5 +1,5 @@
 import React, { useCallback, useState, useMemo } from 'react'
-import { Trans } from '@lingui/macro'
+import { t, Trans } from '@lingui/macro'
 import { Text } from 'rebass'
 import { Currency, CurrencyAmount } from '@uniswap/sdk-core'
 import styled from 'styled-components/macro'
@@ -33,9 +33,19 @@ import InputStepCounter from 'components/InputStepCounter'
 import { useActiveWeb3React } from 'hooks/web3'
 import { useWalletModalToggle } from 'state/application/hooks'
 import TransactionConfirmationModal, { ConfirmationModalContent } from '../../components/TransactionConfirmationModal'
-import useTransactionDeadline from '../../hooks/useTransactionDeadline'
 import Review from './Review'
-import { SP_MAKER_BNB_FEE, SP_MAKER_STAKING_TAX, SP_MAKER_UNSTAKING_TAX } from 'constants/misc'
+import {
+  SP_MAKER_BNB_FEE,
+  SP_MAKER_STAKING_TAX,
+  SP_MAKER_UNSTAKING_TAX,
+  SP_MAKER_PERIOD,
+  BIG_INT_SECONDS_IN_DAY,
+} from 'constants/misc'
+import { useV2StakingContract } from '../../hooks/useContract'
+import { calculateGasMargin } from '../../utils/calculateGasMargin'
+import { useTransactionAdder } from '../../state/transactions/hooks'
+import { ApprovalState, useApproveCallback } from '../../hooks/useApproveCallback'
+import { Dots } from '../Pool/styleds'
 
 const StyledHistoryLink = styled(HistoryLink)<{ flex: string | undefined }>`
   flex: ${({ flex }) => flex ?? 'none'};
@@ -63,8 +73,6 @@ export default function CreateStakingPool() {
   const [tax, setTax] = useState(false)
 
   // txn values
-  const deadline = useTransactionDeadline() // custom from users settings
-
   const [txHash, setTxHash] = useState<string>('')
 
   // modal and loading
@@ -115,7 +123,7 @@ export default function CreateStakingPool() {
     currencies,
     parsedAmounts,
     poolLifespan,
-    currencyToStake,
+    currencyStaked,
     pairToStake,
     minimumStakers,
     errorMessage,
@@ -251,8 +259,94 @@ export default function CreateStakingPool() {
     setTxHash('')
   }, [onClear, txHash])
 
-  const onCreate = useCallback(() => {
-    console.log('test')
+  const v2StakingContract = useV2StakingContract()
+
+  // check whether the user has approved the staking creator on the reward tokens
+  const [approval, approveCallback] = useApproveCallback(
+    parsedAmounts[Field.CURRENCY_REWARD],
+    v2StakingContract?.address
+  )
+
+  const addTransaction = useTransactionAdder()
+
+  const onCreate = useCallback(async () => {
+    if (!v2StakingContract) return
+    if (approval !== ApprovalState.APPROVED) {
+      setAttemptingTxn(false)
+      console.log(approval)
+      throw new Error('Attempting to add reward without approval. Please contact support.')
+    }
+
+    const tokenStaked = currencyStaked?.wrapped
+    const tokenReward = currencies[Field.CURRENCY_REWARD]?.wrapped
+    const {
+      [Field.CURRENCY_REWARD]: parsedRewardAmount,
+      [Field.POOL_LIFESPAN]: rewardTokensPerDay,
+      [Field.MINIMUM_STAKED]: minimumStaked,
+      [Field.MINIMUM_TOTAL_STAKED]: minimumTotalStaked,
+    } = parsedAmounts
+    if (
+      !tokenStaked ||
+      !tokenReward ||
+      !parsedRewardAmount ||
+      !rewardTokensPerDay ||
+      !minimumStakers ||
+      !minimumStaked ||
+      !minimumTotalStaked
+    )
+      return
+
+    const estimate = v2StakingContract.estimateGas.createNewPoolAndPayBNBAndAddReward
+    const method = v2StakingContract.createNewPoolAndPayBNBAndAddReward
+    const args = [
+      {
+        stakedToken: tokenStaked.address,
+        rewardToken: tokenReward.address,
+        stakeTax: tax ? SP_MAKER_STAKING_TAX.toFixed(0) : 0,
+        unstakeTax: tax ? SP_MAKER_UNSTAKING_TAX.toFixed(0) : 0,
+        unstakeRewardTax: tax ? SP_MAKER_UNSTAKING_TAX.toFixed(0) : 0,
+        stakePeriod: SP_MAKER_PERIOD.toString(),
+        rewardTokensByPeriod: rewardTokensPerDay
+          .divide(BIG_INT_SECONDS_IN_DAY)
+          .multiply(SP_MAKER_PERIOD)
+          .quotient.toString(),
+        minTotalStakedForFullReward: minimumTotalStaked.quotient.toString(),
+        minStakersForFullReward: minimumStakers.toString(),
+        minUserStakesForReward: minimumStaked.quotient.toString(),
+        minStakeTime: 0,
+        keepTax: false,
+      },
+      parsedRewardAmount.quotient.toString(),
+    ]
+    const value = SP_MAKER_BNB_FEE.quotient.toString()
+
+    console.log('HEY2')
+
+    setAttemptingTxn(true)
+    await estimate(...args, value ? { value } : {})
+      .then((estimatedGasLimit) =>
+        method(...args, {
+          ...(value ? { value } : {}),
+          gasLimit: calculateGasMargin(estimatedGasLimit),
+        }).then((response: any) => {
+          setAttemptingTxn(false)
+
+          addTransaction(response, {
+            summary: t`Create
+            ${pairToStake ? `${pairToStake.token0.symbol}:${pairToStake.token1.symbol}` : currencyStaked?.symbol} /
+            ${currencies[Field.CURRENCY_REWARD]?.symbol} staking pool`,
+          })
+
+          setTxHash(response.hash)
+        })
+      )
+      .catch((error) => {
+        setAttemptingTxn(false)
+        // we only care if the error is something _other_ than the user rejected the tx
+        if ((error as any)?.code !== 4001) {
+          console.error(error)
+        }
+      })
   }, [])
 
   // TODO: more details in the pendingText
@@ -263,6 +357,16 @@ export default function CreateStakingPool() {
       <ButtonLight onClick={toggleWalletModal} $borderRadius="12px" padding={'12px'}>
         <Trans>Connect Wallet</Trans>
       </ButtonLight>
+    ) : approval !== ApprovalState.APPROVED && isValid ? (
+      <ButtonPrimary onClick={approveCallback} disabled={approval === ApprovalState.PENDING}>
+        {approval === ApprovalState.PENDING ? (
+          <Dots>
+            <Trans>Approving {currencies[Field.CURRENCY_REWARD]?.symbol}</Trans>
+          </Dots>
+        ) : (
+          <Trans>Approve {currencies[Field.CURRENCY_REWARD]?.symbol}</Trans>
+        )}
+      </ButtonPrimary>
     ) : (
       <ButtonError
         onClick={() => {
@@ -287,7 +391,7 @@ export default function CreateStakingPool() {
             onDismiss={handleDismissConfirmation}
             topContent={() => (
               <Review
-                currencyStaked={currencyToStake}
+                currencyStaked={currencyStaked}
                 currencyReward={currencies[Field.CURRENCY_REWARD]}
                 pairToStake={pairToStake}
                 totalRewardAmount={parsedAmounts[Field.CURRENCY_REWARD]}
@@ -462,7 +566,7 @@ export default function CreateStakingPool() {
                   onUserInput={onMinimumStakedInput}
                   showMaxButton={false}
                   hideBalance={true}
-                  currency={currencyToStake ?? null}
+                  currency={currencyStaked ?? null}
                   id="sp-maker-minimum-staked"
                   fiatValue={usdcValues[Field.MINIMUM_STAKED]}
                   pair={pairToStake ?? null}
@@ -478,7 +582,7 @@ export default function CreateStakingPool() {
                   onUserInput={onMinimumTotalStakedInput}
                   showMaxButton={false}
                   hideBalance={true}
-                  currency={currencyToStake ?? null}
+                  currency={currencyStaked ?? null}
                   id="sp-maker-minimum-total-staked"
                   fiatValue={usdcValues[Field.MINIMUM_TOTAL_STAKED]}
                   pair={pairToStake ?? null}

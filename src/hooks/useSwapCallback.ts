@@ -136,7 +136,7 @@ function swapErrorToUserReadableMessage(error: any): string {
     case 'UniswapV2: TRANSFER_FAILED':
       return t`The output token cannot be transferred. There may be an issue with the output token.`
     case 'UniswapV2: K':
-      return t`The LamboDoge invariant x*y=k was not satisfied by the swap. This usually means one of the tokens you are swapping incorporates custom behavior on transfer.`
+      return t`The Legato invariant x*y=k was not satisfied by the swap. This usually means one of the tokens you are swapping incorporates custom behavior on transfer.`
     case 'Too little received':
     case 'Too much requested':
     case 'STF':

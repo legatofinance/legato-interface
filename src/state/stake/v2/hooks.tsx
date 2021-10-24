@@ -87,7 +87,7 @@ export function useV2DerivedStakeInfo(
   currencies: { [field in Field]?: Currency }
   parsedAmounts: { [field in Field]?: CurrencyAmount<Currency> }
   poolLifespan: JSBI
-  currencyToStake: Currency | undefined
+  currencyStaked: Currency | undefined
   pairToStake: Pair | undefined
   minimumStakers: JSBI
   errorMessage?: string
@@ -122,7 +122,7 @@ export function useV2DerivedStakeInfo(
   // pair
   const [, pairToStake] = useV2Pair(stakedCurrencyA, stakedCurrencyB)
 
-  const currencyToStake = liquidityMining ? pairToStake?.liquidityToken : stakedCurrency
+  const currencyStaked = liquidityMining ? pairToStake?.liquidityToken : stakedCurrency
 
   // balances
   const balances = useCurrencyBalances(account ?? undefined, [currencies[Field.CURRENCY_REWARD]])
@@ -146,12 +146,12 @@ export function useV2DerivedStakeInfo(
 
   const minimumStakedAmount: CurrencyAmount<Currency> | undefined = tryParseAmount(
     typedMinimumStakedValue,
-    currencyToStake
+    currencyStaked
   )
 
   const minimumTotalStakedAmount: CurrencyAmount<Currency> | undefined = tryParseAmount(
     typedMinimumTotalStakedValue,
-    currencyToStake
+    currencyStaked
   )
 
   const parsedAmounts: { [field in Field]?: CurrencyAmount<Currency> | undefined } = useMemo(() => {
@@ -165,7 +165,7 @@ export function useV2DerivedStakeInfo(
 
   if (
     !rewardCurrency ||
-    !currencyToStake ||
+    !currencyStaked ||
     !parsedAmounts[Field.POOL_LIFESPAN] ||
     !parsedAmounts[Field.MINIMUM_STAKED] ||
     !parsedAmounts[Field.MINIMUM_TOTAL_STAKED] ||
@@ -192,7 +192,7 @@ export function useV2DerivedStakeInfo(
     currencies,
     parsedAmounts,
     poolLifespan,
-    currencyToStake,
+    currencyStaked,
     pairToStake: liquidityMining ? pairToStake ?? undefined : undefined,
     minimumStakers,
     errorMessage,

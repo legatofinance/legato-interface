@@ -2,7 +2,7 @@
   "background_color": "#fff",
   "display": "standalone",
   "homepage_url": "https://app.uniswap.org",
-  "providedBy": { "name": "LamboDoge", "url": "https://lambodoge.org" },
+  "providedBy": { "name": "Legato", "url": "https://legato.finance" },
   "icons": [
     {
       "src": "./images/192x192_App_Icon.png",
@@ -18,10 +18,10 @@
     }
   ],
   "orientation": "portrait",
-  "name": "LamboDoge",
-  "description": "Swap, Stake or provide liquidity on the LamboDoge Protocol",
+  "name": "Legato",
+  "description": "Swap, Stake or provide liquidity on the Legato Protocol",
   "iconPath": "./images/256x256_App_Icon_Pink.svg",
-  "short_name": "LamboDoge",
+  "short_name": "Legato",
   "start_url": ".",
   "theme_color": "#ff007a"
 }

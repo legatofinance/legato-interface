@@ -14,6 +14,8 @@ interface DoubleCurrencyLogoProps {
   size?: number
   currency0?: Currency
   currency1?: Currency
+  // All other props
+  [x: string]: any
 }
 
 const HigherLogo = styled(CurrencyLogo)`
@@ -29,9 +31,10 @@ export default function DoubleCurrencyLogo({
   currency1,
   size = 16,
   margin = false,
+  ...rest
 }: DoubleCurrencyLogoProps) {
   return (
-    <Wrapper sizeraw={size} margin={margin}>
+    <Wrapper sizeraw={size} margin={margin} {...rest}>
       {currency0 && <HigherLogo currency={currency0} size={size.toString() + 'px'} />}
       {currency1 && <CoveredLogo currency={currency1} size={size.toString() + 'px'} sizeraw={size} />}
     </Wrapper>

@@ -19,6 +19,7 @@ import { BIG_INT_SECONDS_IN_WEEK } from '../../constants/misc'
 import { Trans } from '@lingui/macro'
 import { transparentize } from 'polished'
 import { useActiveWeb3React } from '../../hooks/web3'
+import useTheme from 'hooks/useTheme'
 
 const StatContainer = styled.div`
   display: flex;
@@ -59,16 +60,46 @@ const Wrapper = styled(AutoColumn)<{ showBackground: boolean; bgColor: any }>`
 `
 
 const TopSection = styled.div`
-  display: grid;
-  grid-template-columns: 48px 1fr 120px;
-  grid-gap: 0px;
+  display: flex;
+  justify-content: space-between;
   align-items: center;
   padding: 1rem;
   z-index: 1;
-  margin-left: 12px;
+
+  ${StyledInternalLink} {
+    width: 120px;
+  }
+
   ${({ theme }) => theme.mediaWidth.upToSmall`
-    grid-template-columns: 36px 1fr 96px;
+    ${StyledInternalLink} {
+      width: 96px;
+    }
   `};
+`
+
+// create a wrapper for styled context
+const StyledDoubleCurrencyLogo = styled(DoubleCurrencyLogo)``
+const StyledCurrencyLogo = styled(CurrencyLogo)``
+
+const CurrencyTitle = styled.div`
+  display: grid;
+  grid-template-columns: fit-content(32px) 1fr 32px fit-content(32px) 1fr;
+  align-items: center;
+  margin-left: 12px;
+  overflow: hidden;
+
+  ${StyledDoubleCurrencyLogo} {
+    margin: 0 12px;
+  }
+
+  ${StyledCurrencyLogo} {
+    margin-right: 12px;
+  }
+
+  ${({ theme }) => theme.mediaWidth.upToSmall`
+    grid-template-columns: fit-content(32px) 1fr 0px;
+    grid-template-Row: 1fr 1fr;
+  `}
 `
 
 const BottomSection = styled.div<{ showBackground: boolean }>`
@@ -83,6 +114,8 @@ const BottomSection = styled.div<{ showBackground: boolean }>`
 `
 
 export default function PoolCard({ stakingInfo }: { stakingInfo: StakingInfo }) {
+  const theme = useTheme()
+
   const token0 = stakingInfo.stakedPairTokens?.[0]
   const token1 = stakingInfo.stakedPairTokens?.[1]
 
@@ -138,19 +171,25 @@ export default function PoolCard({ stakingInfo }: { stakingInfo: StakingInfo }) 
       <CardNoise />
 
       <TopSection>
-        {currency0 && currency1 ? (
-          <DoubleCurrencyLogo currency0={currency0} currency1={currency1} size={24} />
-        ) : (
-          <CurrencyLogo currency={stakingInfo.stakedToken} size={'24px'} />
-        )}
-        <TYPE.white fontWeight={600} fontSize={24}>
-          {currency0 && currency1 ? `${currency0.symbol}-${currency1.symbol}` : stakingInfo.stakedToken.symbol}
-        </TYPE.white>
+        <CurrencyTitle>
+          {currency0 && currency1 ? (
+            <StyledDoubleCurrencyLogo currency0={currency0} currency1={currency1} size={24} />
+          ) : (
+            <StyledCurrencyLogo currency={stakingInfo.stakedToken} size={'24px'} />
+          )}
+          <TYPE.white fontWeight={600} fontSize={24}>
+            {currency0 && currency1 ? `${currency0.symbol}:${currency1.symbol}` : stakingInfo.stakedToken.symbol}
+          </TYPE.white>
+          <TYPE.label fontWeight={600} fontSize={24} color={theme.text2} style={{ marginLeft: '12px' }}>
+            /
+          </TYPE.label>
+          <StyledCurrencyLogo currency={stakingInfo.rewardToken} size={'24px'} />
+          <TYPE.white fontWeight={600} fontSize={24}>
+            {stakingInfo.rewardToken.symbol}
+          </TYPE.white>
+        </CurrencyTitle>
 
-        <StyledInternalLink
-          to={`/stake/${currencyId(stakingInfo.stakedToken)}/${currencyId(stakingInfo.rewardToken)}`}
-          style={{ width: '100%' }}
-        >
+        <StyledInternalLink to={`/stake/${currencyId(stakingInfo.stakedToken)}/${currencyId(stakingInfo.rewardToken)}`}>
           <ButtonPrimary padding="8px" $borderRadius="8px">
             {isStaking ? <Trans>Manage</Trans> : <Trans>Deposit</Trans>}
           </ButtonPrimary>

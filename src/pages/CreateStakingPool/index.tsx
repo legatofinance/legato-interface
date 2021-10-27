@@ -41,7 +41,7 @@ import {
   SP_MAKER_PERIOD,
   BIG_INT_SECONDS_IN_DAY,
 } from 'constants/misc'
-import { useV2StakingContract } from '../../hooks/useContract'
+import { useV2StakingCreatorContract } from '../../hooks/useContract'
 import { calculateGasMargin } from '../../utils/calculateGasMargin'
 import { useTransactionAdder } from '../../state/transactions/hooks'
 import { ApprovalState, useApproveCallback } from '../../hooks/useApproveCallback'
@@ -259,21 +259,20 @@ export default function CreateStakingPool() {
     setTxHash('')
   }, [onClear, txHash])
 
-  const v2StakingContract = useV2StakingContract()
+  const v2StakingCreatorContract = useV2StakingCreatorContract()
 
   // check whether the user has approved the staking creator on the reward tokens
   const [approval, approveCallback] = useApproveCallback(
     parsedAmounts[Field.CURRENCY_REWARD],
-    v2StakingContract?.address
+    v2StakingCreatorContract?.address
   )
 
   const addTransaction = useTransactionAdder()
 
   const onCreate = useCallback(async () => {
-    if (!v2StakingContract) return
+    if (!v2StakingCreatorContract) return
     if (approval !== ApprovalState.APPROVED) {
       setAttemptingTxn(false)
-      console.log(approval)
       throw new Error('Attempting to add reward without approval. Please contact support.')
     }
 
@@ -296,8 +295,8 @@ export default function CreateStakingPool() {
     )
       return
 
-    const estimate = v2StakingContract.estimateGas.createNewPoolAndPayBNBAndAddReward
-    const method = v2StakingContract.createNewPoolAndPayBNBAndAddReward
+    const estimate = v2StakingCreatorContract.estimateGas.createNewPoolAndPayBNBAndAddReward
+    const method = v2StakingCreatorContract.createNewPoolAndPayBNBAndAddReward
     const args = [
       {
         stakedToken: tokenStaked.address,
@@ -319,8 +318,6 @@ export default function CreateStakingPool() {
       parsedRewardAmount.quotient.toString(),
     ]
     const value = SP_MAKER_BNB_FEE.quotient.toString()
-
-    console.log('HEY2')
 
     setAttemptingTxn(true)
     await estimate(...args, value ? { value } : {})
@@ -347,7 +344,7 @@ export default function CreateStakingPool() {
           console.error(error)
         }
       })
-  }, [])
+  }, [approval, currencyStaked, currencies, parsedAmounts, v2StakingCreatorContract, minimumStakers, tax])
 
   // TODO: more details in the pendingText
   const pendingText = `Creating staking pool`

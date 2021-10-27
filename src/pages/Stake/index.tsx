@@ -1,8 +1,8 @@
-import { useContext } from 'react'
+import { useState, useCallback } from 'react'
 import JSBI from 'jsbi'
 import { Link } from 'react-router-dom'
 import { AutoColumn } from '../../components/Column'
-import styled, { ThemeContext } from 'styled-components/macro'
+import styled from 'styled-components/macro'
 import { useStakingInfo } from '../../state/stake/hooks'
 import { TYPE, ExternalLink } from '../../theme'
 import { Text } from 'rebass'
@@ -19,6 +19,8 @@ import { currencyId } from '../../utils/currencyId'
 import { Trans } from '@lingui/macro'
 import Select from '../../components/Select'
 import SearchBar from '../../components/SearchBar'
+import { useV2StakingPools } from '../../hooks/useV2StakingPools'
+import useTheme from 'hooks/useTheme'
 
 const PageWrapper = styled(AutoColumn)`
   max-width: 640px;
@@ -130,12 +132,21 @@ const StyledSearchBar = styled(SearchBar)`
 `
 
 export default function Earn() {
-  const theme = useContext(ThemeContext)
+  const theme = useTheme()
   const { chainId, account } = useActiveWeb3React()
 
+  const [hideEmptyDeposits, setHideEmptyDeposits] = useState(false)
+
+  const toggleHideEmptyDeposits = useCallback(() => {
+    setHideEmptyDeposits(!hideEmptyDeposits)
+  }, [hideEmptyDeposits, setHideEmptyDeposits])
+
   // staking info for connected account
-  const stakingInfos = useStakingInfo()?.filter(
-    (stakingInfo) => stakingInfo.open || stakingInfo.stakedAmount.greaterThan('0')
+  const v1StakingInfos = useStakingInfo() ?? []
+  const v2StakingPools = useV2StakingPools() ?? []
+
+  const stakingInfos = [...v1StakingInfos, ...v2StakingPools].filter(
+    (stakingInfo) => stakingInfo.stakedAmount.greaterThan('0') || (stakingInfo.open && !hideEmptyDeposits)
   )
 
   return (
@@ -178,10 +189,10 @@ export default function Earn() {
           </TYPE.mediumHeader>
           <ButtonRow>
             <Text opacity={0.6} fontWeight={500} fontSize={16}>
-              Hide empty deposit
+              Hide empty deposits
             </Text>
             <CheckBoxWrapper>
-              <CheckBox id="checkbox" type="checkbox" />
+              <CheckBox id="checkbox" type="checkbox" checked={hideEmptyDeposits} onChange={toggleHideEmptyDeposits} />
               <CheckBoxLabel htmlFor="checkbox" />
             </CheckBoxWrapper>
           </ButtonRow>

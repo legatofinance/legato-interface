@@ -2,54 +2,126 @@
 	{
 		"inputs": [
 			{
-				"internalType": "address",
-				"name": "vault",
-				"type": "address"
-			},
-			{
-				"internalType": "address",
-				"name": "ldogeToken",
-				"type": "address"
-			},
-			{
-				"internalType": "address",
-				"name": "WBNB",
-				"type": "address"
-			},
-			{
-				"internalType": "address",
-				"name": "BUSD",
-				"type": "address"
-			},
-			{
-				"internalType": "address",
-				"name": "LegatoStakeV2V1Address",
-				"type": "address"
-			},
-			{
-				"internalType": "address",
-				"name": "LDOGE_WBNB_pair",
-				"type": "address"
-			},
-			{
-				"internalType": "address",
-				"name": "BUSD_WBNB_pair",
-				"type": "address"
-			},
-			{
-				"internalType": "uint256",
-				"name": "minimumLDOGEHoldingsInDollars",
-				"type": "uint256"
-			},
-			{
-				"internalType": "uint256",
-				"name": "minimumLDOGEHoldingsInLDOGE",
-				"type": "uint256"
-			},
-			{
-				"internalType": "uint256",
-				"name": "creationFeePrice",
-				"type": "uint256"
+				"components": [
+					{
+						"internalType": "address",
+						"name": "ldogeToken",
+						"type": "address"
+					},
+					{
+						"internalType": "address",
+						"name": "WBNB",
+						"type": "address"
+					},
+					{
+						"internalType": "address",
+						"name": "BUSD",
+						"type": "address"
+					},
+					{
+						"internalType": "address",
+						"name": "LegatoStakeV2V1Address",
+						"type": "address"
+					},
+					{
+						"internalType": "address",
+						"name": "LDOGE_WBNB_pair",
+						"type": "address"
+					},
+					{
+						"internalType": "address",
+						"name": "BUSD_WBNB_pair",
+						"type": "address"
+					},
+					{
+						"internalType": "uint256",
+						"name": "minimumLDOGEHoldingsInDollars",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "minimumLDOGEHoldingsInLDOGE",
+						"type": "uint256"
+					},
+					{
+						"internalType": "address",
+						"name": "parentOwner",
+						"type": "address"
+					},
+					{
+						"internalType": "address",
+						"name": "poolCreator",
+						"type": "address"
+					},
+					{
+						"internalType": "address",
+						"name": "stakedToken",
+						"type": "address"
+					},
+					{
+						"internalType": "address",
+						"name": "rewardToken",
+						"type": "address"
+					},
+					{
+						"internalType": "uint256",
+						"name": "stakeTax",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "unstakeTax",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "unstakeRewardTax",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "stakePeriod",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "rewardTokensByPeriod",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "minTotalStakedForFullReward",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "minStakersForFullReward",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "minUserStakesForReward",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "minStakeTime",
+						"type": "uint256"
+					},
+					{
+						"internalType": "bool",
+						"name": "keepTax",
+						"type": "bool"
+					},
+					{
+						"internalType": "bool",
+						"name": "disabled",
+						"type": "bool"
+					}
+				],
+				"internalType": "struct StakePool.Pool",
+				"name": "pool",
+				"type": "tuple"
 			}
 		],
 		"stateMutability": "nonpayable",
@@ -78,6 +150,50 @@
 		"anonymous": false,
 		"inputs": [
 			{
+				"indexed": false,
+				"internalType": "address",
+				"name": "from",
+				"type": "address"
+			},
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "amount",
+				"type": "uint256"
+			},
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "nextClaimDate",
+				"type": "uint256"
+			}
+		],
+		"name": "ClaimRewardSuccessfully",
+		"type": "event"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "amountInDollars",
+				"type": "uint256"
+			},
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "amountInLDOGE",
+				"type": "uint256"
+			}
+		],
+		"name": "MinimumHoldingChanged",
+		"type": "event"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
 				"indexed": true,
 				"internalType": "address",
 				"name": "previousOwner",
@@ -91,6 +207,81 @@
 			}
 		],
 		"name": "OwnershipTransferred",
+		"type": "event"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": false,
+				"internalType": "address",
+				"name": "to",
+				"type": "address"
+			},
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "rewardBalance",
+				"type": "uint256"
+			}
+		],
+		"name": "RetrieveRewardSuccessfully",
+		"type": "event"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": false,
+				"internalType": "address",
+				"name": "rewardTokenAddress",
+				"type": "address"
+			},
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "amount",
+				"type": "uint256"
+			}
+		],
+		"name": "RewardAddedSuccessfully",
+		"type": "event"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": false,
+				"internalType": "address",
+				"name": "from",
+				"type": "address"
+			},
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "totalAmount",
+				"type": "uint256"
+			},
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "tax",
+				"type": "uint256"
+			},
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "amount",
+				"type": "uint256"
+			},
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "nextClaimDate",
+				"type": "uint256"
+			}
+		],
+		"name": "StakeTokenSuccessfully",
 		"type": "event"
 	},
 	{
@@ -132,69 +323,23 @@
 		"type": "event"
 	},
 	{
-		"inputs": [],
-		"name": "_BUSD",
-		"outputs": [
+		"anonymous": false,
+		"inputs": [
 			{
+				"indexed": false,
 				"internalType": "address",
-				"name": "",
+				"name": "to",
 				"type": "address"
+			},
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "amount",
+				"type": "uint256"
 			}
 		],
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"inputs": [],
-		"name": "_BUSD_WBNB_pair",
-		"outputs": [
-			{
-				"internalType": "address",
-				"name": "",
-				"type": "address"
-			}
-		],
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"inputs": [],
-		"name": "_LDOGE_WBNB_pair",
-		"outputs": [
-			{
-				"internalType": "address",
-				"name": "",
-				"type": "address"
-			}
-		],
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"inputs": [],
-		"name": "_LegatoStakeV2V1Address",
-		"outputs": [
-			{
-				"internalType": "address",
-				"name": "",
-				"type": "address"
-			}
-		],
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"inputs": [],
-		"name": "_WBNB",
-		"outputs": [
-			{
-				"internalType": "address",
-				"name": "",
-				"type": "address"
-			}
-		],
-		"stateMutability": "view",
-		"type": "function"
+		"name": "UnstakeTokenSuccessfully",
+		"type": "event"
 	},
 	{
 		"inputs": [
@@ -236,7 +381,7 @@
 	},
 	{
 		"inputs": [],
-		"name": "_creationFeePrice",
+		"name": "_countStakers",
 		"outputs": [
 			{
 				"internalType": "uint256",
@@ -248,47 +393,14 @@
 		"type": "function"
 	},
 	{
-		"inputs": [],
-		"name": "_factory",
-		"outputs": [
-			{
-				"internalType": "contract LegatoStakeV2Factory",
-				"name": "",
-				"type": "address"
-			}
-		],
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"inputs": [],
-		"name": "_ldogeToken",
-		"outputs": [
+		"inputs": [
 			{
 				"internalType": "address",
 				"name": "",
 				"type": "address"
 			}
 		],
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"inputs": [],
-		"name": "_minimumLDOGEHoldingsInDollars",
-		"outputs": [
-			{
-				"internalType": "uint256",
-				"name": "",
-				"type": "uint256"
-			}
-		],
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"inputs": [],
-		"name": "_minimumLDOGEHoldingsInLDOGE",
+		"name": "_firstStake",
 		"outputs": [
 			{
 				"internalType": "uint256",
@@ -302,6 +414,25 @@
 	{
 		"inputs": [],
 		"name": "_minimumVotes",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			}
+		],
+		"name": "_nextClaimDate",
 		"outputs": [
 			{
 				"internalType": "uint256",
@@ -327,7 +458,20 @@
 	},
 	{
 		"inputs": [],
-		"name": "_poolIndex",
+		"name": "_retrieveFundWallet",
+		"outputs": [
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "_rewardPool",
 		"outputs": [
 			{
 				"internalType": "uint256",
@@ -339,19 +483,13 @@
 		"type": "function"
 	},
 	{
-		"inputs": [
+		"inputs": [],
+		"name": "_taxPool",
+		"outputs": [
 			{
 				"internalType": "uint256",
 				"name": "",
 				"type": "uint256"
-			}
-		],
-		"name": "_pools",
-		"outputs": [
-			{
-				"internalType": "address",
-				"name": "",
-				"type": "address"
 			}
 		],
 		"stateMutability": "view",
@@ -372,12 +510,63 @@
 	},
 	{
 		"inputs": [],
-		"name": "_vault",
+		"name": "_totalRewards",
 		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "_totalStaked",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
 			{
 				"internalType": "address",
 				"name": "",
 				"type": "address"
+			}
+		],
+		"name": "_userRewards",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			}
+		],
+		"name": "_userStakes",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
 			}
 		],
 		"stateMutability": "view",
@@ -405,451 +594,12 @@
 	{
 		"inputs": [
 			{
-				"components": [
-					{
-						"internalType": "address",
-						"name": "stakedToken",
-						"type": "address"
-					},
-					{
-						"internalType": "address",
-						"name": "rewardToken",
-						"type": "address"
-					},
-					{
-						"internalType": "uint256",
-						"name": "stakeTax",
-						"type": "uint256"
-					},
-					{
-						"internalType": "uint256",
-						"name": "unstakeTax",
-						"type": "uint256"
-					},
-					{
-						"internalType": "uint256",
-						"name": "unstakeRewardTax",
-						"type": "uint256"
-					},
-					{
-						"internalType": "uint256",
-						"name": "stakePeriod",
-						"type": "uint256"
-					},
-					{
-						"internalType": "uint256",
-						"name": "rewardTokensByPeriod",
-						"type": "uint256"
-					},
-					{
-						"internalType": "uint256",
-						"name": "minTotalStakedForFullReward",
-						"type": "uint256"
-					},
-					{
-						"internalType": "uint256",
-						"name": "minStakersForFullReward",
-						"type": "uint256"
-					},
-					{
-						"internalType": "uint256",
-						"name": "minUserStakesForReward",
-						"type": "uint256"
-					},
-					{
-						"internalType": "uint256",
-						"name": "minStakeTime",
-						"type": "uint256"
-					},
-					{
-						"internalType": "bool",
-						"name": "keepTax",
-						"type": "bool"
-					}
-				],
-				"internalType": "struct LegatoStakeV2Creator.NewPoolInfo",
-				"name": "info",
-				"type": "tuple"
-			}
-		],
-		"name": "createNewPool",
-		"outputs": [
-			{
-				"internalType": "address",
-				"name": "",
-				"type": "address"
-			}
-		],
-		"stateMutability": "nonpayable",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"components": [
-					{
-						"internalType": "address",
-						"name": "stakedToken",
-						"type": "address"
-					},
-					{
-						"internalType": "address",
-						"name": "rewardToken",
-						"type": "address"
-					},
-					{
-						"internalType": "uint256",
-						"name": "stakeTax",
-						"type": "uint256"
-					},
-					{
-						"internalType": "uint256",
-						"name": "unstakeTax",
-						"type": "uint256"
-					},
-					{
-						"internalType": "uint256",
-						"name": "unstakeRewardTax",
-						"type": "uint256"
-					},
-					{
-						"internalType": "uint256",
-						"name": "stakePeriod",
-						"type": "uint256"
-					},
-					{
-						"internalType": "uint256",
-						"name": "rewardTokensByPeriod",
-						"type": "uint256"
-					},
-					{
-						"internalType": "uint256",
-						"name": "minTotalStakedForFullReward",
-						"type": "uint256"
-					},
-					{
-						"internalType": "uint256",
-						"name": "minStakersForFullReward",
-						"type": "uint256"
-					},
-					{
-						"internalType": "uint256",
-						"name": "minUserStakesForReward",
-						"type": "uint256"
-					},
-					{
-						"internalType": "uint256",
-						"name": "minStakeTime",
-						"type": "uint256"
-					},
-					{
-						"internalType": "bool",
-						"name": "keepTax",
-						"type": "bool"
-					}
-				],
-				"internalType": "struct LegatoStakeV2Creator.NewPoolInfo",
-				"name": "info",
-				"type": "tuple"
-			},
-			{
 				"internalType": "uint256",
-				"name": "rewardAmount",
+				"name": "amount",
 				"type": "uint256"
 			}
 		],
-		"name": "createNewPoolAndAddReward",
-		"outputs": [
-			{
-				"internalType": "address",
-				"name": "",
-				"type": "address"
-			}
-		],
-		"stateMutability": "nonpayable",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"components": [
-					{
-						"internalType": "address",
-						"name": "stakedToken",
-						"type": "address"
-					},
-					{
-						"internalType": "address",
-						"name": "rewardToken",
-						"type": "address"
-					},
-					{
-						"internalType": "uint256",
-						"name": "stakeTax",
-						"type": "uint256"
-					},
-					{
-						"internalType": "uint256",
-						"name": "unstakeTax",
-						"type": "uint256"
-					},
-					{
-						"internalType": "uint256",
-						"name": "unstakeRewardTax",
-						"type": "uint256"
-					},
-					{
-						"internalType": "uint256",
-						"name": "stakePeriod",
-						"type": "uint256"
-					},
-					{
-						"internalType": "uint256",
-						"name": "rewardTokensByPeriod",
-						"type": "uint256"
-					},
-					{
-						"internalType": "uint256",
-						"name": "minTotalStakedForFullReward",
-						"type": "uint256"
-					},
-					{
-						"internalType": "uint256",
-						"name": "minStakersForFullReward",
-						"type": "uint256"
-					},
-					{
-						"internalType": "uint256",
-						"name": "minUserStakesForReward",
-						"type": "uint256"
-					},
-					{
-						"internalType": "uint256",
-						"name": "minStakeTime",
-						"type": "uint256"
-					},
-					{
-						"internalType": "bool",
-						"name": "keepTax",
-						"type": "bool"
-					}
-				],
-				"internalType": "struct LegatoStakeV2Creator.NewPoolInfo",
-				"name": "info",
-				"type": "tuple"
-			}
-		],
-		"name": "createNewPoolAndPay",
-		"outputs": [
-			{
-				"internalType": "address",
-				"name": "",
-				"type": "address"
-			}
-		],
-		"stateMutability": "nonpayable",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"components": [
-					{
-						"internalType": "address",
-						"name": "stakedToken",
-						"type": "address"
-					},
-					{
-						"internalType": "address",
-						"name": "rewardToken",
-						"type": "address"
-					},
-					{
-						"internalType": "uint256",
-						"name": "stakeTax",
-						"type": "uint256"
-					},
-					{
-						"internalType": "uint256",
-						"name": "unstakeTax",
-						"type": "uint256"
-					},
-					{
-						"internalType": "uint256",
-						"name": "unstakeRewardTax",
-						"type": "uint256"
-					},
-					{
-						"internalType": "uint256",
-						"name": "stakePeriod",
-						"type": "uint256"
-					},
-					{
-						"internalType": "uint256",
-						"name": "rewardTokensByPeriod",
-						"type": "uint256"
-					},
-					{
-						"internalType": "uint256",
-						"name": "minTotalStakedForFullReward",
-						"type": "uint256"
-					},
-					{
-						"internalType": "uint256",
-						"name": "minStakersForFullReward",
-						"type": "uint256"
-					},
-					{
-						"internalType": "uint256",
-						"name": "minUserStakesForReward",
-						"type": "uint256"
-					},
-					{
-						"internalType": "uint256",
-						"name": "minStakeTime",
-						"type": "uint256"
-					},
-					{
-						"internalType": "bool",
-						"name": "keepTax",
-						"type": "bool"
-					}
-				],
-				"internalType": "struct LegatoStakeV2Creator.NewPoolInfo",
-				"name": "info",
-				"type": "tuple"
-			},
-			{
-				"internalType": "uint256",
-				"name": "rewardAmount",
-				"type": "uint256"
-			}
-		],
-		"name": "createNewPoolAndPayAndAddReward",
-		"outputs": [
-			{
-				"internalType": "address",
-				"name": "",
-				"type": "address"
-			}
-		],
-		"stateMutability": "nonpayable",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"components": [
-					{
-						"internalType": "address",
-						"name": "stakedToken",
-						"type": "address"
-					},
-					{
-						"internalType": "address",
-						"name": "rewardToken",
-						"type": "address"
-					},
-					{
-						"internalType": "uint256",
-						"name": "stakeTax",
-						"type": "uint256"
-					},
-					{
-						"internalType": "uint256",
-						"name": "unstakeTax",
-						"type": "uint256"
-					},
-					{
-						"internalType": "uint256",
-						"name": "unstakeRewardTax",
-						"type": "uint256"
-					},
-					{
-						"internalType": "uint256",
-						"name": "stakePeriod",
-						"type": "uint256"
-					},
-					{
-						"internalType": "uint256",
-						"name": "rewardTokensByPeriod",
-						"type": "uint256"
-					},
-					{
-						"internalType": "uint256",
-						"name": "minTotalStakedForFullReward",
-						"type": "uint256"
-					},
-					{
-						"internalType": "uint256",
-						"name": "minStakersForFullReward",
-						"type": "uint256"
-					},
-					{
-						"internalType": "uint256",
-						"name": "minUserStakesForReward",
-						"type": "uint256"
-					},
-					{
-						"internalType": "uint256",
-						"name": "minStakeTime",
-						"type": "uint256"
-					},
-					{
-						"internalType": "bool",
-						"name": "keepTax",
-						"type": "bool"
-					}
-				],
-				"internalType": "struct LegatoStakeV2Creator.NewPoolInfo",
-				"name": "info",
-				"type": "tuple"
-			},
-			{
-				"internalType": "uint256",
-				"name": "rewardAmount",
-				"type": "uint256"
-			}
-		],
-		"name": "createNewPoolAndPayBNBAndAddReward",
-		"outputs": [
-			{
-				"internalType": "address",
-				"name": "",
-				"type": "address"
-			}
-		],
-		"stateMutability": "payable",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "address",
-				"name": "",
-				"type": "address"
-			}
-		],
-		"name": "creationFeesReceived",
-		"outputs": [
-			{
-				"internalType": "uint256",
-				"name": "",
-				"type": "uint256"
-			}
-		],
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "uint256",
-				"name": "WBNBamount",
-				"type": "uint256"
-			}
-		],
-		"name": "deposit",
+		"name": "addRewardToPool",
 		"outputs": [],
 		"stateMutability": "nonpayable",
 		"type": "function"
@@ -857,12 +607,91 @@
 	{
 		"inputs": [
 			{
+				"internalType": "bool",
+				"name": "unstake",
+				"type": "bool"
+			}
+		],
+		"name": "canDoOperation",
+		"outputs": [
+			{
+				"internalType": "bool",
+				"name": "",
+				"type": "bool"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "claimRewards",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "computeMinimumLDOGEHoldings",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "disablePool",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "enablePool",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "estimatedMyRewards",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
 				"internalType": "address",
-				"name": "pool",
+				"name": "account",
 				"type": "address"
 			}
 		],
-		"name": "getPoolInfoByAddress",
+		"name": "estimatedRewards",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "getPool",
 		"outputs": [
 			{
 				"components": [
@@ -993,134 +822,55 @@
 	{
 		"inputs": [
 			{
+				"internalType": "address",
+				"name": "account",
+				"type": "address"
+			}
+		],
+		"name": "getUserRewards",
+		"outputs": [
+			{
 				"internalType": "uint256",
-				"name": "pool",
+				"name": "",
 				"type": "uint256"
 			}
 		],
-		"name": "getPoolInfoByIndex",
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "account",
+				"type": "address"
+			}
+		],
+		"name": "getUserStakes",
 		"outputs": [
 			{
-				"components": [
-					{
-						"internalType": "address",
-						"name": "ldogeToken",
-						"type": "address"
-					},
-					{
-						"internalType": "address",
-						"name": "WBNB",
-						"type": "address"
-					},
-					{
-						"internalType": "address",
-						"name": "BUSD",
-						"type": "address"
-					},
-					{
-						"internalType": "address",
-						"name": "LegatoStakeV2V1Address",
-						"type": "address"
-					},
-					{
-						"internalType": "address",
-						"name": "LDOGE_WBNB_pair",
-						"type": "address"
-					},
-					{
-						"internalType": "address",
-						"name": "BUSD_WBNB_pair",
-						"type": "address"
-					},
-					{
-						"internalType": "uint256",
-						"name": "minimumLDOGEHoldingsInDollars",
-						"type": "uint256"
-					},
-					{
-						"internalType": "uint256",
-						"name": "minimumLDOGEHoldingsInLDOGE",
-						"type": "uint256"
-					},
-					{
-						"internalType": "address",
-						"name": "parentOwner",
-						"type": "address"
-					},
-					{
-						"internalType": "address",
-						"name": "poolCreator",
-						"type": "address"
-					},
-					{
-						"internalType": "address",
-						"name": "stakedToken",
-						"type": "address"
-					},
-					{
-						"internalType": "address",
-						"name": "rewardToken",
-						"type": "address"
-					},
-					{
-						"internalType": "uint256",
-						"name": "stakeTax",
-						"type": "uint256"
-					},
-					{
-						"internalType": "uint256",
-						"name": "unstakeTax",
-						"type": "uint256"
-					},
-					{
-						"internalType": "uint256",
-						"name": "unstakeRewardTax",
-						"type": "uint256"
-					},
-					{
-						"internalType": "uint256",
-						"name": "stakePeriod",
-						"type": "uint256"
-					},
-					{
-						"internalType": "uint256",
-						"name": "rewardTokensByPeriod",
-						"type": "uint256"
-					},
-					{
-						"internalType": "uint256",
-						"name": "minTotalStakedForFullReward",
-						"type": "uint256"
-					},
-					{
-						"internalType": "uint256",
-						"name": "minStakersForFullReward",
-						"type": "uint256"
-					},
-					{
-						"internalType": "uint256",
-						"name": "minUserStakesForReward",
-						"type": "uint256"
-					},
-					{
-						"internalType": "uint256",
-						"name": "minStakeTime",
-						"type": "uint256"
-					},
-					{
-						"internalType": "bool",
-						"name": "keepTax",
-						"type": "bool"
-					},
-					{
-						"internalType": "bool",
-						"name": "disabled",
-						"type": "bool"
-					}
-				],
-				"internalType": "struct StakePool.Pool",
+				"internalType": "uint256",
 				"name": "",
-				"type": "tuple"
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "account",
+				"type": "address"
+			}
+		],
+		"name": "hasMinimumLdogeHolding",
+		"outputs": [
+			{
+				"internalType": "bool",
+				"name": "",
+				"type": "bool"
 			}
 		],
 		"stateMutability": "view",
@@ -1156,6 +906,33 @@
 	{
 		"inputs": [],
 		"name": "resetTimeLockAndVote",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "retrieveMyRewards",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "retrieveRewardTokens",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "account",
+				"type": "address"
+			}
+		],
+		"name": "retrieveRewards",
 		"outputs": [],
 		"stateMutability": "nonpayable",
 		"type": "function"
@@ -1200,21 +977,50 @@
 		"inputs": [
 			{
 				"internalType": "uint256",
-				"name": "minimumLDOGEHoldingsInDollars",
-				"type": "uint256"
-			},
-			{
-				"internalType": "uint256",
-				"name": "minimumLDOGEHoldingsInLDOGE",
-				"type": "uint256"
-			},
-			{
-				"internalType": "uint256",
-				"name": "creationFeePrice",
+				"name": "time",
 				"type": "uint256"
 			}
 		],
-		"name": "setFees",
+		"name": "setMinStakeTime",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "count",
+				"type": "uint256"
+			}
+		],
+		"name": "setMinStakersForFullReward",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "amount",
+				"type": "uint256"
+			}
+		],
+		"name": "setMinTotalStakedForFullReward",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "amount",
+				"type": "uint256"
+			}
+		],
+		"name": "setMinUserStakesForReward",
 		"outputs": [],
 		"stateMutability": "nonpayable",
 		"type": "function"
@@ -1235,6 +1041,68 @@
 	{
 		"inputs": [
 			{
+				"internalType": "uint256",
+				"name": "amount",
+				"type": "uint256"
+			}
+		],
+		"name": "setRewardTokensByPeriod",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "stakePeriod",
+				"type": "uint256"
+			}
+		],
+		"name": "setStakePeriod",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "stakeTokenTax",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "unstakeTokenTax",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "unstakeRewardTax",
+				"type": "uint256"
+			}
+		],
+		"name": "setTax",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "amount",
+				"type": "uint256"
+			}
+		],
+		"name": "stakeTokens",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
 				"internalType": "address",
 				"name": "newOwner",
 				"type": "address"
@@ -1247,13 +1115,47 @@
 	},
 	{
 		"inputs": [],
-		"name": "vote",
+		"name": "unstakeMyTokens",
 		"outputs": [],
 		"stateMutability": "nonpayable",
 		"type": "function"
 	},
 	{
-		"stateMutability": "payable",
-		"type": "receive"
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "amount",
+				"type": "uint256"
+			}
+		],
+		"name": "unstakeMyTokensAmount",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "minimumLDOGEHoldingsInDollars",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "minimumLDOGEHoldingsInLDOGE",
+				"type": "uint256"
+			}
+		],
+		"name": "updateminimumLDOGEHoldingsInDollars",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "vote",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
 	}
 ]

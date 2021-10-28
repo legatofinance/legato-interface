@@ -21,6 +21,7 @@ import Select from '../../components/Select'
 import SearchBar from '../../components/SearchBar'
 import { useV2StakingPools } from '../../hooks/useV2StakingPools'
 import useTheme from 'hooks/useTheme'
+import { usePoolsData } from 'state/stake/v2/hooks'
 
 const PageWrapper = styled(AutoColumn)`
   max-width: 640px;
@@ -131,23 +132,47 @@ const StyledSearchBar = styled(SearchBar)`
   `}
 `
 
+export enum StakingBoardSortingOption {
+  APY = 'APY',
+  TVL = 'TVL',
+}
+
 export default function Earn() {
   const theme = useTheme()
   const { chainId, account } = useActiveWeb3React()
 
   const [hideEmptyDeposits, setHideEmptyDeposits] = useState(false)
+  const [sortingOption, setSortingOption] = useState(StakingBoardSortingOption.APY)
+  const poolsData = usePoolsData()
 
   const toggleHideEmptyDeposits = useCallback(() => {
     setHideEmptyDeposits(!hideEmptyDeposits)
   }, [hideEmptyDeposits, setHideEmptyDeposits])
 
+  const updateSortingOption = useCallback(
+    (newSortingOption) => {
+      setSortingOption(newSortingOption.value)
+    },
+    [sortingOption, setSortingOption]
+  )
+
   // staking info for connected account
   const v1StakingInfos = useStakingInfo() ?? []
   const v2StakingPools = useV2StakingPools() ?? []
 
-  const stakingInfos = [...v1StakingInfos, ...v2StakingPools].filter(
-    (stakingInfo) => stakingInfo.stakedAmount.greaterThan('0') || (stakingInfo.open && !hideEmptyDeposits)
-  )
+  const stakingInfos = [...v1StakingInfos, ...v2StakingPools]
+    .filter((stakingInfo) => stakingInfo.stakedAmount.greaterThan('0') || (stakingInfo.open && !hideEmptyDeposits))
+    .sort((a, b) => {
+      switch (sortingOption) {
+        case StakingBoardSortingOption.APY:
+          return poolsData[a.poolUid]?.apy < poolsData[b.poolUid]?.apy ? 1 : -1
+          break
+
+        case StakingBoardSortingOption.TVL:
+          return poolsData[a.poolUid]?.totalDeposited < poolsData[b.poolUid]?.totalDeposited ? 1 : -1
+          break
+      }
+    })
 
   return (
     <PageWrapper gap="lg" justify="center">
@@ -207,17 +232,14 @@ export default function Earn() {
               options={[
                 {
                   label: 'APY',
-                  value: 0,
+                  value: StakingBoardSortingOption.APY,
                 },
                 {
-                  label: 'TVL',
-                  value: 1,
-                },
-                {
-                  label: 'Date of creation',
-                  value: 2,
+                  label: 'Total deposited',
+                  value: StakingBoardSortingOption.TVL,
                 },
               ]}
+              onOptionChange={updateSortingOption}
             />
           </AutoColumn>
 

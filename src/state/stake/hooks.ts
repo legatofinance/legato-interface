@@ -35,6 +35,8 @@ export const REWARDS_DURATION_DAYS = 60
 export interface StakingInfo {
   // Pool index
   poolIndex: number
+  // Pool unique identifier
+  poolUid: string
   // the tokens to stake
   stakedToken: Token
   // the tokens to reward
@@ -227,8 +229,11 @@ export function useStakingInfo(): StakingInfo[] | undefined {
 
       const claimedAmount = CurrencyAmount.fromRawAmount(rewardToken, JSBI.BigInt(claimedAmountState?.result?.[0] ?? 0))
 
+      const poolIndex = listPools.result?.[0][i][1]?.toNumber() ?? -1
+
       stakingInfos.push({
-        poolIndex: listPools.result?.[0][i][1]?.toNumber() ?? 0,
+        poolIndex: poolIndex,
+        poolUid: `v1-${poolIndex}`,
         stakedPairTokens: stakedPairTokens,
         stakedToken: stakedToken,
         rewardToken: rewardToken,

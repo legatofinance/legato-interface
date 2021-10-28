@@ -10,9 +10,16 @@ export enum Field {
   MINIMUM_TOTAL_STAKED = 'MINIMUM_TOTAL_STAKED',
 }
 
+export interface PoolData {
+  apy: number
+  totalDeposited: number
+}
+
 export const typeReward = createAction<{ typedValue: string }>('stakeV2/typeReward')
 export const typePoolLifespan = createAction<{ typedValue: string }>('stakeV2/typePoolLifespan')
 export const typeMinimumStaked = createAction<{ typedValue: string }>('stakeV2/typeMinimumStaked')
 export const typeMinimumTotalStaked = createAction<{ typedValue: string }>('stakeV2/typeMinimumTotalStaked')
 export const typeMinimumStakers = createAction<{ typedValue: string }>('stakeV2/typeMinimumStakers')
 export const resetStakeState = createAction<void>('stakeV2/resetStakeState')
+
+export const setPoolData = createAction<{ poolUid: string; poolData: PoolData }>('stakeV2/setPoolData')

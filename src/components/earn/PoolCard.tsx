@@ -1,3 +1,4 @@
+import { useEffect } from 'react'
 import { AutoColumn } from '../Column'
 import { RowBetween } from '../Row'
 import styled from 'styled-components/macro'
@@ -20,6 +21,7 @@ import { Trans } from '@lingui/macro'
 import { transparentize } from 'polished'
 import { useActiveWeb3React } from '../../hooks/web3'
 import useTheme from 'hooks/useTheme'
+import { usePoolData, useSetPoolData } from 'state/stake/v2/hooks'
 
 const StatContainer = styled.div`
   display: flex;
@@ -116,6 +118,8 @@ const BottomSection = styled.div<{ showBackground: boolean }>`
 export default function PoolCard({ stakingInfo }: { stakingInfo: StakingInfo }) {
   const theme = useTheme()
 
+  const setPoolData = useSetPoolData(stakingInfo.poolUid)
+
   const token0 = stakingInfo.stakedPairTokens?.[0]
   const token1 = stakingInfo.stakedPairTokens?.[1]
 
@@ -157,10 +161,21 @@ export default function PoolCard({ stakingInfo }: { stakingInfo: StakingInfo }) 
   // get the USD value of staked WETH
   const USDPrice = useUSDCPrice(WETH)
 
-  let valueOfTotalStakedAmountInUSDC: CurrencyAmount<Currency> | undefined
+  let totalDepositedInUSDC: CurrencyAmount<Currency> | undefined
   if ((WETH === stakingInfo?.stakedToken || valueOfTotalStakedAmountInWETH) && stakingInfo) {
-    valueOfTotalStakedAmountInUSDC = USDPrice?.quote(valueOfTotalStakedAmountInWETH ?? stakingInfo?.totalStakedAmount)
+    totalDepositedInUSDC = USDPrice?.quote(valueOfTotalStakedAmountInWETH ?? stakingInfo?.totalStakedAmount)
   }
+
+  const apyNumber =
+    apy && JSBI.toNumber(apy.denominator) ? JSBI.toNumber(apy.numerator) / JSBI.toNumber(apy.denominator) : 0
+  const totalDepositedNumber =
+    totalDepositedInUSDC && JSBI.toNumber(totalDepositedInUSDC.denominator)
+      ? JSBI.toNumber(totalDepositedInUSDC.numerator) / JSBI.toNumber(totalDepositedInUSDC.denominator)
+      : 0
+
+  useEffect(() => {
+    setPoolData({ apy: apyNumber, totalDeposited: totalDepositedNumber })
+  }, [apyNumber, totalDepositedNumber, setPoolData])
 
   return (
     <Wrapper showBackground={isStaking} bgColor={backgroundColor}>
@@ -201,13 +216,13 @@ export default function PoolCard({ stakingInfo }: { stakingInfo: StakingInfo }) 
           <TYPE.white>
             <Trans>Total deposited</Trans>
           </TYPE.white>
-          <TYPE.white>${valueOfTotalStakedAmountInUSDC?.toFixed(2, { groupSeparator: ',' }) ?? '0.00'}</TYPE.white>
+          <TYPE.white>${totalDepositedInUSDC?.toFixed(2, { groupSeparator: ',' }) ?? '0.00'}</TYPE.white>
         </RowBetween>
         <RowBetween>
           <TYPE.white>
             <Trans>Pool APY</Trans>
           </TYPE.white>
-          <TYPE.white>{apy && +apy?.denominator.toString() ? <Trans>{apy.toFixed(2)}%</Trans> : '-'}</TYPE.white>
+          <TYPE.white>{apy && +apy?.denominator.toString() ? `${apy.toFixed(2)}%` : '-'}</TYPE.white>
         </RowBetween>
       </StatContainer>
 

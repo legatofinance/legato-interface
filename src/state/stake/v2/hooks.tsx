@@ -2,7 +2,7 @@ import { useCallback, useMemo } from 'react'
 import { AppState } from '../../index'
 import { useAppDispatch, useAppSelector } from 'state/hooks'
 import { useActiveWeb3React } from 'hooks/web3'
-import { Currency, CurrencyAmount } from '@uniswap/sdk-core'
+import { Currency, CurrencyAmount, Fraction } from '@uniswap/sdk-core'
 import { Pair } from '@lambodoge/sdk'
 import JSBI from 'jsbi'
 
@@ -16,6 +16,8 @@ import {
   typeMinimumStaked,
   typeMinimumTotalStaked,
   typeMinimumStakers,
+  setPoolData,
+  PoolData,
 } from './actions'
 import { SP_MAKER_BNB_FEE } from 'constants/misc'
 
@@ -197,4 +199,17 @@ export function useV2DerivedStakeInfo(
     minimumStakers,
     errorMessage,
   }
+}
+
+export function usePoolsData(): { [poolUid: string]: PoolData } {
+  return useAppSelector((state: AppState) => state.stakeV2.poolsData)
+}
+
+export function usePoolData(poolUid: string): PoolData | undefined {
+  return useAppSelector((state: AppState) => state.stakeV2.poolsData[poolUid])
+}
+
+export function useSetPoolData(poolUid: string): (poolData: PoolData) => void {
+  const dispatch = useAppDispatch()
+  return useCallback((poolData: PoolData) => dispatch(setPoolData({ poolUid, poolData })), [dispatch, poolUid])
 }

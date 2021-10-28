@@ -1,4 +1,5 @@
 import { createReducer } from '@reduxjs/toolkit'
+import JSBI from 'jsbi'
 import {
   Field,
   resetStakeState,
@@ -7,6 +8,8 @@ import {
   typeMinimumStaked,
   typeMinimumTotalStaked,
   typeMinimumStakers,
+  setPoolData,
+  PoolData,
 } from './actions'
 
 export interface StakeState {
@@ -15,6 +18,7 @@ export interface StakeState {
   readonly typedMinimumStakedValue: string
   readonly typedMinimumTotalStakedValue: string
   readonly typedMinimumStakersValue: string
+  poolsData: { [poolUid: string]: PoolData }
 }
 
 export const initialState: StakeState = {
@@ -23,6 +27,7 @@ export const initialState: StakeState = {
   typedMinimumStakedValue: '',
   typedMinimumTotalStakedValue: '',
   typedMinimumStakersValue: '',
+  poolsData: {},
 }
 
 export default createReducer<StakeState>(initialState, (builder) =>
@@ -56,6 +61,15 @@ export default createReducer<StakeState>(initialState, (builder) =>
       return {
         ...state,
         typedMinimumStakersValue: typedValue,
+      }
+    })
+    .addCase(setPoolData, (state, { payload: { poolUid, poolData } }) => {
+      return {
+        ...state,
+        poolsData: {
+          ...state.poolsData,
+          [poolUid]: poolData,
+        },
       }
     })
 )

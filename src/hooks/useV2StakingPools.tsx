@@ -181,8 +181,11 @@ export function useV2StakingPools(): StakingInfo[] | undefined {
 
       const claimedAmount = CurrencyAmount.fromRawAmount(rewardToken, JSBI.BigInt(claimedAmountState?.result?.[0] ?? 0))
 
+      const poolIndex = (poolIndexes[i]?.[0] as number) ?? -1
+
       stakingInfos.push({
-        poolIndex: 0,
+        poolIndex: poolIndex,
+        poolUid: `v2-${poolIndex}`,
         stakedPairTokens: stakedPairTokens,
         stakedToken: stakedToken,
         rewardToken: rewardToken,

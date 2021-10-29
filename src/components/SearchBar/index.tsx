@@ -1,4 +1,4 @@
-import React, { InputHTMLAttributes } from 'react'
+import React, { useCallback, InputHTMLAttributes } from 'react'
 import styled from 'styled-components/macro'
 
 const StyledSearchBar = styled.input`
@@ -24,5 +24,7 @@ interface SearchBarProps extends InputHTMLAttributes<HTMLInputElement> {
 }
 
 export default function SearchBar({ onTextChange, ...props }: SearchBarProps) {
-  return <StyledSearchBar {...props} />
+  const onInput = useCallback((event) => onTextChange(event.target.value), [onTextChange])
+
+  return <StyledSearchBar onInput={onInput} {...props} />
 }

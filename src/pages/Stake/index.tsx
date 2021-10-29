@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useMemo } from 'react'
 import JSBI from 'jsbi'
 import { Link } from 'react-router-dom'
 import { AutoColumn } from '../../components/Column'
@@ -22,6 +22,7 @@ import SearchBar from '../../components/SearchBar'
 import { useV2StakingPools } from '../../hooks/useV2StakingPools'
 import useTheme from 'hooks/useTheme'
 import { usePoolsData } from 'state/stake/v2/hooks'
+import useDebounce from 'hooks/useDebounce'
 
 const PageWrapper = styled(AutoColumn)`
   max-width: 640px;
@@ -143,6 +144,8 @@ export default function Earn() {
 
   const [hideEmptyDeposits, setHideEmptyDeposits] = useState(false)
   const [sortingOption, setSortingOption] = useState(StakingBoardSortingOption.APY)
+  const [search, setSearch] = useState('')
+  const debouncedSearch = useDebounce(search, 300)
   const poolsData = usePoolsData()
 
   const toggleHideEmptyDeposits = useCallback(() => {
@@ -160,19 +163,38 @@ export default function Earn() {
   const v1StakingInfos = useStakingInfo() ?? []
   const v2StakingPools = useV2StakingPools() ?? []
 
-  const stakingInfos = [...v1StakingInfos, ...v2StakingPools]
-    .filter((stakingInfo) => stakingInfo.stakedAmount.greaterThan('0') || (stakingInfo.open && !hideEmptyDeposits))
-    .sort((a, b) => {
-      switch (sortingOption) {
-        case StakingBoardSortingOption.APY:
-          return poolsData[a.poolUid]?.apy < poolsData[b.poolUid]?.apy ? 1 : -1
-          break
+  const stakingInfos = useMemo(() => {
+    return [...v1StakingInfos, ...v2StakingPools]
+      .filter((stakingInfo) => {
+        if (!(stakingInfo.stakedAmount.greaterThan('0') || (stakingInfo.open && !hideEmptyDeposits))) {
+          return false
+        }
 
-        case StakingBoardSortingOption.TVL:
-          return poolsData[a.poolUid]?.totalDeposited < poolsData[b.poolUid]?.totalDeposited ? 1 : -1
-          break
-      }
-    })
+        if (debouncedSearch !== '') {
+          const token0 = stakingInfo.stakedPairTokens?.[0]
+          const token1 = stakingInfo.stakedPairTokens?.[1]
+          const stakedSymbol =
+            (token0 && token1 ? `${token0.symbol}:${token1.symbol}` : stakingInfo.stakedToken.symbol)?.toLowerCase() ??
+            ''
+          const rewardSymbol = stakingInfo.rewardToken.symbol?.toLowerCase() ?? ''
+          const lowerCasedSearch = debouncedSearch.toLowerCase()
+
+          return rewardSymbol.indexOf(lowerCasedSearch) >= 0 || stakedSymbol.indexOf(lowerCasedSearch) >= 0
+        }
+        return true
+      })
+      .sort((a, b) => {
+        switch (sortingOption) {
+          case StakingBoardSortingOption.APY:
+            return poolsData[a.poolUid]?.apy < poolsData[b.poolUid]?.apy ? 1 : -1
+            break
+
+          case StakingBoardSortingOption.TVL:
+            return poolsData[a.poolUid]?.totalDeposited < poolsData[b.poolUid]?.totalDeposited ? 1 : -1
+            break
+        }
+      })
+  }, [v1StakingInfos, v2StakingPools, hideEmptyDeposits, sortingOption, debouncedSearch])
 
   return (
     <PageWrapper gap="lg" justify="center">
@@ -247,7 +269,7 @@ export default function Earn() {
             <TYPE.white fontSize={14} style={{ marginLeft: '8px' }}>
               Search:
             </TYPE.white>
-            <StyledSearchBar placeholder="Search pools" onTextChange={(text) => console.log(text)} />
+            <StyledSearchBar placeholder="Search pools" onTextChange={setSearch} />
           </AutoColumn>
 
           <ResponsiveButtonPrimary id="create-pool-button" as={Link} to="/stake/create" padding="6px 8px">

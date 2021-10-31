@@ -1,6 +1,5 @@
 import { useState, useCallback } from 'react'
 import { useV2LiquidityTokenPermit } from '../../hooks/useERC20Permit'
-import useTransactionDeadline from '../../hooks/useTransactionDeadline'
 import { formatFixedCurrencyAmount } from '../../utils/formatCurrencyAmount'
 import Modal from '../Modal'
 import { AutoColumn } from '../Column'
@@ -14,7 +13,7 @@ import { Pair } from '@lambodoge/sdk'
 import { Token, CurrencyAmount } from '@uniswap/sdk-core'
 import { useActiveWeb3React } from '../../hooks/web3'
 import { maxAmountSpend } from '../../utils/maxAmountSpend'
-import { usePairContract, useStakingContract, useV2RouterContract } from '../../hooks/useContract'
+import { usePairContract, useStakingRouterContract, useV2RouterContract } from '../../hooks/useContract'
 import { STAKING_ROUTER_ADDRESS } from 'constants/addresses'
 import { useApproveCallback, ApprovalState } from '../../hooks/useApproveCallback'
 import { StakingInfo, useDerivedStakeInfo } from '../../state/stake/hooks'
@@ -24,6 +23,7 @@ import { LoadingView, SubmittedView } from '../ModalViews'
 import { t, Trans } from '@lingui/macro'
 import { unwrappedToken } from '../../utils/unwrappedToken'
 import { BIG_INT_SECONDS_IN_WEEK } from '../../constants/misc'
+import { calculateGasMargin } from '../../utils/calculateGasMargin'
 
 const HypotheticalRewardRate = styled.div<{ dim: boolean }>`
   display: flex;
@@ -74,15 +74,11 @@ export default function StakingModal({ isOpen, onDismiss, stakingInfo, userLiqui
     )
   }
 
+  // txn values
+  const [txHash, setTxHash] = useState<string>('')
+
   // state for pending and submitted txn views
-  const addTransaction = useTransactionAdder()
-  const [attempting, setAttempting] = useState<boolean>(false)
-  const [hash, setHash] = useState<string | undefined>()
-  const wrappedOnDismiss = useCallback(() => {
-    setHash(undefined)
-    setAttempting(false)
-    onDismiss()
-  }, [onDismiss])
+  const [attemptingTxn, setAttemptingTxn] = useState<boolean>(false) // clicked confirm
 
   // pair contract for this token to be staked
   const dummyPair = stakingInfo.stakedPairTokens
@@ -92,36 +88,68 @@ export default function StakingModal({ isOpen, onDismiss, stakingInfo, userLiqui
       )
     : undefined
 
+  const wrappedOnDismiss = useCallback(() => {
+    setTxHash('')
+    setAttemptingTxn(false)
+    onDismiss()
+  }, [onDismiss, setTxHash, setAttemptingTxn])
+
+  const stakingContract = useStakingRouterContract(stakingInfo)
+
   // approval data for stake
-  const deadline = useTransactionDeadline()
   const [approval, approveCallback] = useApproveCallback(
     parsedAmount,
-    chainId ? STAKING_ROUTER_ADDRESS[chainId] : undefined
+    stakingInfo.address ?? (chainId ? STAKING_ROUTER_ADDRESS[chainId] : undefined)
   )
 
-  const stakingContract = useStakingContract()
-  async function onStake() {
-    setAttempting(true)
-    if (stakingContract && parsedAmount && deadline) {
-      if (approval === ApprovalState.APPROVED) {
-        stakingContract
-          .stakeTokens(stakingInfo.poolIndex, `0x${parsedAmount.quotient.toString(16)}`)
-          .then((response: TransactionResponse) => {
-            addTransaction(response, {
-              summary: t`Deposit liquidity`,
-            })
-            setHash(response.hash)
-          })
-          .catch((error: any) => {
-            setAttempting(false)
-            console.log(error)
-          })
-      } else {
-        setAttempting(false)
-        throw new Error('Attempting to stake without approval. Please contact support.')
-      }
+  const addTransaction = useTransactionAdder()
+
+  const onStake = useCallback(async () => {
+    if (!stakingContract) return
+    if (approval !== ApprovalState.APPROVED) {
+      setAttemptingTxn(false)
+      throw new Error('Attempting to add reward without approval. Please contact support.')
     }
-  }
+
+    const amount = parsedAmount?.quotient.toString(16)
+    if (!amount) return
+
+    const estimate = stakingContract.estimateGas.stakeTokens
+    const method = stakingContract.stakeTokens
+    const value = null
+    let args: Array<string | string[] | number> = []
+
+    if (stakingInfo.version === 1) {
+      args = [stakingInfo.poolIndex, `0x${amount}`]
+    } else if (stakingInfo.version === 2) {
+      args = [`0x${amount}`]
+    }
+
+    setAttemptingTxn(true)
+    await estimate(...args, value ? { value } : {})
+      .then((estimatedGasLimit) =>
+        method(...args, {
+          ...(value ? { value } : {}),
+          gasLimit: calculateGasMargin(estimatedGasLimit),
+        }).then((response: any) => {
+          setAttemptingTxn(false)
+
+          addTransaction(response, {
+            summary: t`Stake
+            ${currency0 && currency1 ? `${currency0.symbol}:${currency1.symbol}` : stakingInfo.stakedToken.symbol}`,
+          })
+
+          setTxHash(response.hash)
+        })
+      )
+      .catch((error) => {
+        setAttemptingTxn(false)
+        // we only care if the error is something _other_ than the user rejected the tx
+        if ((error as any)?.code !== 4001) {
+          console.error(error)
+        }
+      })
+  }, [approval])
 
   // wrapped onUserInput to clear signatures
   const onUserInput = useCallback((typedValue: string) => {
@@ -137,7 +165,7 @@ export default function StakingModal({ isOpen, onDismiss, stakingInfo, userLiqui
 
   return (
     <Modal isOpen={isOpen} onDismiss={wrappedOnDismiss} maxHeight={90}>
-      {!attempting && !hash && (
+      {!attemptingTxn && !txHash && (
         <ContentWrapper gap="lg">
           <RowBetween>
             <TYPE.mediumHeader>
@@ -197,7 +225,7 @@ export default function StakingModal({ isOpen, onDismiss, stakingInfo, userLiqui
           <ProgressCircles steps={[approval === ApprovalState.APPROVED]} disabled={true} />
         </ContentWrapper>
       )}
-      {attempting && !hash && (
+      {attemptingTxn && !txHash && (
         <LoadingView onDismiss={wrappedOnDismiss}>
           <AutoColumn gap="12px" justify={'center'}>
             <TYPE.largeHeader>
@@ -214,8 +242,8 @@ export default function StakingModal({ isOpen, onDismiss, stakingInfo, userLiqui
           </AutoColumn>
         </LoadingView>
       )}
-      {attempting && hash && (
-        <SubmittedView onDismiss={wrappedOnDismiss} hash={hash}>
+      {attemptingTxn && txHash && (
+        <SubmittedView onDismiss={wrappedOnDismiss} hash={txHash}>
           <AutoColumn gap="12px" justify={'center'}>
             <TYPE.largeHeader>
               <Trans>Transaction Submitted</Trans>

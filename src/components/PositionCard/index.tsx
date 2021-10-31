@@ -45,7 +45,7 @@ interface PositionCardProps {
   showUnwrapped?: boolean
   border?: string
   stakedBalance?: CurrencyAmount<Token> // optional balance to indicate that liquidity is deposited in mining pool
-  stakeRewardToken?: Token // optional token address
+  stakeSlug?: string // optional token address
 }
 
 export function MinimalPositionCard({ pair, showUnwrapped = false, border }: PositionCardProps) {
@@ -160,7 +160,7 @@ export function MinimalPositionCard({ pair, showUnwrapped = false, border }: Pos
   )
 }
 
-export default function FullPositionCard({ pair, border, stakedBalance, stakeRewardToken }: PositionCardProps) {
+export default function FullPositionCard({ pair, border, stakedBalance, stakeSlug }: PositionCardProps) {
   const { account } = useActiveWeb3React()
 
   const currency0 = unwrappedToken(pair.token0)
@@ -332,14 +332,8 @@ export default function FullPositionCard({ pair, border, stakedBalance, stakeRew
                 </ButtonPrimary>
               </AutoRow>
             )}
-            {stakedBalance && JSBI.greaterThan(stakedBalance.quotient, BIG_INT_ZERO) && stakeRewardToken && (
-              <ButtonPrimary
-                padding="8px"
-                $borderRadius="8px"
-                as={Link}
-                to={`/stake/${currencyId(pair.liquidityToken)}/${currencyId(stakeRewardToken)}`}
-                width="100%"
-              >
+            {stakedBalance && JSBI.greaterThan(stakedBalance.quotient, BIG_INT_ZERO) && stakeSlug && (
+              <ButtonPrimary padding="8px" $borderRadius="8px" as={Link} to={`/stake/${stakeSlug}`} width="100%">
                 <Trans>Manage Liquidity in Rewards Pool</Trans>
               </ButtonPrimary>
             )}

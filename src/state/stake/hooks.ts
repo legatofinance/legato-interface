@@ -24,6 +24,7 @@ import { abi as IUniswapV2PairABI } from '@uniswap/v2-core/build/IUniswapV2Pair.
 import { STAKING_ROUTER_ADDRESS } from 'constants/addresses'
 import { SupportedChainId } from 'constants/chains'
 import { BIG_INT_SECONDS_IN_YEAR } from 'constants/misc'
+import getPoolUid from 'utils/getPoolUid'
 
 const PAIR_INTERFACE = new Interface(IUniswapV2PairABI)
 const STAKING_ROUTER_INTERFACE = new Interface(STAKING_ROUTER_ABI)
@@ -33,6 +34,10 @@ export const STAKING_GENESIS = 1600387200
 export const REWARDS_DURATION_DAYS = 60
 
 export interface StakingInfo {
+  // contract address
+  address: string | undefined
+  // Version number
+  version: number
   // Pool index
   poolIndex: number
   // Pool unique identifier
@@ -232,8 +237,10 @@ export function useStakingInfo(): StakingInfo[] | undefined {
       const poolIndex = listPools.result?.[0][i][1]?.toNumber() ?? -1
 
       stakingInfos.push({
+        address: undefined,
+        version: 1,
         poolIndex: poolIndex,
-        poolUid: `v1-${poolIndex}`,
+        poolUid: getPoolUid('v1', poolIndex),
         stakedPairTokens: stakedPairTokens,
         stakedToken: stakedToken,
         rewardToken: rewardToken,

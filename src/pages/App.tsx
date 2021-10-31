@@ -71,7 +71,7 @@ export default function App() {
             <Switch>
               <Route exact strict path="/stake" component={Stake} />
               <Route exact strict path="/stake" component={Earn} />
-              <Route exact strict path="/stake/:currencyIdA/:currencyIdB" component={Manage} />
+              <Route exact strict path="/stake/:version/:poolIndex" component={Manage} />
 
               <Route exact strict path="/stake/create" component={CreateStakingPool} />
 

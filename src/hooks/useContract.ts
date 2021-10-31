@@ -15,6 +15,7 @@ import ERC20_ABI from 'abis/erc20.json'
 import ERC20_BYTES32_ABI from 'abis/erc20_bytes32.json'
 import WETH_ABI from 'abis/weth.json'
 import EIP_2612 from 'abis/eip_2612.json'
+import { StakingInfo } from 'state/stake/hooks'
 
 import {
   STAKING_ROUTER_ADDRESS,
@@ -115,4 +116,19 @@ export function useV2StakingCreatorContract(withSignerIfPossible?: boolean) {
 
 export function useV2StakingContract(address: string | undefined, withSignerIfPossible?: boolean) {
   return useContract(address, V2_STAKING_ROUTER_ABI, withSignerIfPossible)
+}
+
+export function useStakingRouterContract(stakingInfo: StakingInfo, withSignerIfPossible?: boolean) {
+  let address: string | { [chainId: number]: string } | undefined
+  let ABI: any
+
+  if (stakingInfo.version === 1) {
+    address = STAKING_ROUTER_ADDRESS
+    ABI = STAKING_ROUTER_ABI
+  } else if (stakingInfo.version === 2) {
+    address = stakingInfo.address
+    ABI = V2_STAKING_ROUTER_ABI
+  }
+
+  return useContract(address, ABI, withSignerIfPossible)
 }

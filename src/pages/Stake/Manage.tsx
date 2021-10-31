@@ -33,6 +33,8 @@ import useUSDCPrice, { usePriceRatio } from '../../hooks/useUSDCPrice'
 import { BIG_INT_ZERO, BIG_INT_SECONDS_IN_WEEK } from '../../constants/misc'
 import { Trans } from '@lingui/macro'
 import { transparentize } from 'polished'
+import getPoolUid from 'utils/getPoolUid'
+import { useV2StakingPools } from 'hooks/useV2StakingPools'
 
 const PageWrapper = styled(AutoColumn)`
   max-width: 640px;
@@ -94,13 +96,15 @@ const DataRow = styled(RowBetween)`
 
 export default function Manage({
   match: {
-    params: { currencyIdA, currencyIdB },
+    params: { version, poolIndex },
   },
-}: RouteComponentProps<{ currencyIdA: string; currencyIdB: string }>) {
-  const stakingInfo = useStakingInfo()?.filter(
-    (stakingInfo) =>
-      stakingInfo?.stakedToken.address === currencyIdA && stakingInfo?.rewardToken.address === currencyIdB
-  )[0]
+}: RouteComponentProps<{ version: string; poolIndex: string }>) {
+  const poolUid = getPoolUid(version, poolIndex)
+
+  const v1StakingInfos = useStakingInfo() ?? []
+  const v2StakingPools = useV2StakingPools() ?? []
+
+  const stakingInfo = [...v1StakingInfos, ...v2StakingPools].filter((stakingInfo) => stakingInfo?.poolUid == poolUid)[0]
 
   if (stakingInfo) {
     return <ManageContent stakingInfo={stakingInfo} />

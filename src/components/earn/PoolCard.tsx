@@ -204,7 +204,7 @@ export default function PoolCard({ stakingInfo }: { stakingInfo: StakingInfo }) 
           </TYPE.white>
         </CurrencyTitle>
 
-        <StyledInternalLink to={`/stake/${currencyId(stakingInfo.stakedToken)}/${currencyId(stakingInfo.rewardToken)}`}>
+        <StyledInternalLink to={`/stake/v${stakingInfo.version}/${stakingInfo.poolIndex}`}>
           <ButtonPrimary padding="8px" $borderRadius="8px">
             {isStaking ? <Trans>Manage</Trans> : <Trans>Deposit</Trans>}
           </ButtonPrimary>

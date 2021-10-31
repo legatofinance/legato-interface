@@ -17,6 +17,7 @@ import V2_STAKING_ROUTER_ABI from 'abis/v2-staking-router.json'
 import { abi as IUniswapV2PairABI } from '@uniswap/v2-core/build/IUniswapV2Pair.json'
 import { useToken, useTokens } from 'hooks/Tokens'
 import { BIG_INT_SECONDS_IN_YEAR } from 'constants/misc'
+import getPoolUid from 'utils/getPoolUid'
 
 const PAIR_INTERFACE = new Interface(IUniswapV2PairABI)
 const V2_STAKING_ROUTER_INTERFACE = new Interface(V2_STAKING_ROUTER_ABI)
@@ -184,8 +185,10 @@ export function useV2StakingPools(): StakingInfo[] | undefined {
       const poolIndex = (poolIndexes[i]?.[0] as number) ?? -1
 
       stakingInfos.push({
+        address: v2StakingAddresses[i],
         poolIndex: poolIndex,
-        poolUid: `v2-${poolIndex}`,
+        version: 2,
+        poolUid: getPoolUid('v2', poolIndex),
         stakedPairTokens: stakedPairTokens,
         stakedToken: stakedToken,
         rewardToken: rewardToken,

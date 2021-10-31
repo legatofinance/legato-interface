@@ -20,6 +20,7 @@ import { Dots } from '../../components/swap/styleds'
 import { CardSection, DataCard, CardNoise, CardBGImage, CardBGImageAtmosphere } from '../../components/earn/styled'
 import { SwitchLocaleLink } from '../../components/SwitchLocaleLink'
 import { useStakingInfo } from '../../state/stake/hooks'
+import { useV2StakingPools } from 'hooks/useV2StakingPools'
 import { BIG_INT_ZERO } from '../../constants/misc'
 import { STAKING_ROUTER_ADDRESS } from '../../constants/addresses'
 import { Pair } from '@lambodoge/sdk'
@@ -106,8 +107,10 @@ export default function Pool() {
   const allV2PairsWithLiquidity = v2Pairs.map(([, pair]) => pair).filter((v2Pair): v2Pair is Pair => Boolean(v2Pair))
 
   // show liquidity even if its deposited in rewards contract
-  const stakingInfo = useStakingInfo()
-  const stakingInfosWithBalance = stakingInfo?.filter((pool) =>
+  const v1StakingInfos = useStakingInfo() ?? []
+  const v2StakingPools = useV2StakingPools() ?? []
+
+  const stakingInfosWithBalance = [...v1StakingInfos, ...v2StakingPools]?.filter((pool) =>
     JSBI.greaterThan(pool.stakedAmount.quotient, BIG_INT_ZERO)
   )
   const stakingPairs = useV2Pairs(
@@ -207,7 +210,7 @@ export default function Pool() {
                         key={chainId ? STAKING_ROUTER_ADDRESS[chainId] : undefined}
                         pair={stakingPair[1]}
                         stakedBalance={stakingInfosWithBalance?.[i].stakedAmount}
-                        stakeRewardToken={stakingInfosWithBalance?.[i].rewardToken}
+                        stakeSlug={`v${stakingInfosWithBalance?.[i].version}/${stakingInfosWithBalance?.[i].poolIndex}`}
                       />
                     )
                 )}

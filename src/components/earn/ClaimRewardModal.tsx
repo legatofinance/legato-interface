@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useCallback } from 'react'
 import Modal from '../Modal'
 import { AutoColumn } from '../Column'
 import styled from 'styled-components/macro'
@@ -6,12 +6,13 @@ import { RowBetween } from '../Row'
 import { TYPE, CloseIcon } from '../../theme'
 import { ButtonError } from '../Button'
 import { StakingInfo } from '../../state/stake/hooks'
-import { useStakingContract } from '../../hooks/useContract'
+import { useStakingRouterContract } from '../../hooks/useContract'
 import { SubmittedView, LoadingView } from '../ModalViews'
 import { TransactionResponse } from '@ethersproject/providers'
 import { useTransactionAdder } from '../../state/transactions/hooks'
 import { useActiveWeb3React } from '../../hooks/web3'
 import { t, Trans } from '@lingui/macro'
+import { calculateGasMargin } from '../../utils/calculateGasMargin'
 
 const ContentWrapper = styled(AutoColumn)`
   width: 100%;
@@ -30,48 +31,66 @@ export default function ClaimRewardModal({ isOpen, onDismiss, stakingInfo, retri
 
   // monitor call to help UI loading state
   const addTransaction = useTransactionAdder()
-  const [hash, setHash] = useState<string | undefined>()
-  const [attempting, setAttempting] = useState(false)
+  const [txHash, setTxHash] = useState<string | undefined>()
+  const [attemptingTxn, setAttemptingTxn] = useState(false)
 
   function wrappedOnDismiss() {
-    setHash(undefined)
-    setAttempting(false)
+    setTxHash(undefined)
+    setAttemptingTxn(false)
     onDismiss()
   }
 
-  const stakingContract = useStakingContract()
+  const stakingContract = useStakingRouterContract(stakingInfo)
 
-  async function onClaimReward() {
-    if (stakingContract && stakingInfo?.stakedAmount) {
-      setAttempting(true)
-      await stakingContract
-        .claimRewards(stakingInfo.poolIndex)
-        .then((response: TransactionResponse) => {
-          addTransaction(response, { summary: t`Claim accumulated ${stakingInfo?.rewardToken.symbol} rewards` })
-          setHash(response.hash)
-        })
-        .catch((error: any) => {
-          setAttempting(false)
-          console.log(error)
-        })
-    }
-  }
+  const onHarverstReward = useCallback(
+    async (withRetrieve: boolean) => {
+      if (!stakingContract) return
 
-  async function onRetrieveReward() {
-    if (stakingContract && stakingInfo?.stakedAmount) {
-      setAttempting(true)
-      await stakingContract
-        .retrieveMyRewards(stakingInfo.poolIndex)
-        .then((response: TransactionResponse) => {
-          addTransaction(response, { summary: t`Retrieve accumulated ${stakingInfo?.rewardToken.symbol} rewards` })
-          setHash(response.hash)
+      let estimate,
+        method: (...args: any) => Promise<TransactionResponse>,
+        args: Array<string | string[] | number> = []
+
+      if (withRetrieve) {
+        method = stakingContract.retrieveMyRewards
+        estimate = stakingContract.estimateGas.retrieveMyRewards
+      } else {
+        method = stakingContract.claimRewards
+        estimate = stakingContract.estimateGas.claimRewards
+      }
+
+      if (stakingInfo.version === 1) {
+        args = [stakingInfo.poolIndex]
+      } else if (stakingInfo.version === 2) {
+        args = []
+      }
+
+      setAttemptingTxn(true)
+      await estimate(...args)
+        .then((estimatedGasLimit) =>
+          method(...args, {
+            gasLimit: calculateGasMargin(estimatedGasLimit),
+          }).then((response: any) => {
+            addTransaction(response, {
+              summary: t`${withRetrieve ? 'Retrieve' : 'Claim'}
+              accumulated ${stakingInfo?.rewardToken.symbol} rewards`,
+            })
+
+            setTxHash(response.hash)
+          })
+        )
+        .catch((error) => {
+          setAttemptingTxn(false)
+          // we only care if the error is something _other_ than the user rejected the tx
+          if ((error as any)?.code !== 4001) {
+            console.error(error)
+          }
         })
-        .catch((error: any) => {
-          setAttempting(false)
-          console.log(error)
-        })
-    }
-  }
+    },
+    [stakingContract]
+  )
+
+  const onClaimReward = useCallback(async () => onHarverstReward(false), [onHarverstReward])
+  const onRetrieveReward = useCallback(async () => onHarverstReward(true), [onHarverstReward])
 
   let error: string | undefined
   if (!account) {
@@ -83,7 +102,7 @@ export default function ClaimRewardModal({ isOpen, onDismiss, stakingInfo, retri
 
   return (
     <Modal isOpen={isOpen} onDismiss={wrappedOnDismiss} maxHeight={90}>
-      {!attempting && !hash && (
+      {!attemptingTxn && !txHash && (
         <ContentWrapper gap="lg">
           <RowBetween>
             <TYPE.mediumHeader>
@@ -125,7 +144,7 @@ export default function ClaimRewardModal({ isOpen, onDismiss, stakingInfo, retri
           </ButtonError>
         </ContentWrapper>
       )}
-      {attempting && !hash && (
+      {attemptingTxn && !txHash && (
         <LoadingView onDismiss={wrappedOnDismiss}>
           <AutoColumn gap="12px" justify={'center'}>
             <TYPE.body fontSize={20}>
@@ -139,8 +158,8 @@ export default function ClaimRewardModal({ isOpen, onDismiss, stakingInfo, retri
           </AutoColumn>
         </LoadingView>
       )}
-      {hash && (
-        <SubmittedView onDismiss={wrappedOnDismiss} hash={hash}>
+      {txHash && (
+        <SubmittedView onDismiss={wrappedOnDismiss} hash={txHash}>
           <AutoColumn gap="12px" justify={'center'}>
             <TYPE.largeHeader>
               <Trans>Transaction Submitted</Trans>

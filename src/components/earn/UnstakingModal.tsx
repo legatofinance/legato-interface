@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useCallback } from 'react'
 import Modal from '../Modal'
 import { AutoColumn } from '../Column'
 import styled from 'styled-components/macro'
@@ -6,7 +6,7 @@ import { RowBetween } from '../Row'
 import { TYPE, CloseIcon } from '../../theme'
 import { ButtonError } from '../Button'
 import { StakingInfo } from '../../state/stake/hooks'
-import { useStakingContract } from '../../hooks/useContract'
+import { useStakingRouterContract } from '../../hooks/useContract'
 import { SubmittedView, LoadingView } from '../ModalViews'
 import { TransactionResponse } from '@ethersproject/providers'
 import { useTransactionAdder } from '../../state/transactions/hooks'
@@ -14,6 +14,7 @@ import FormattedCurrencyAmount from '../FormattedCurrencyAmount'
 import { useActiveWeb3React } from '../../hooks/web3'
 import { t, Trans } from '@lingui/macro'
 import { unwrappedToken } from '../../utils/unwrappedToken'
+import { calculateGasMargin } from '../../utils/calculateGasMargin'
 
 const ContentWrapper = styled(AutoColumn)`
   width: 100%;
@@ -37,34 +38,52 @@ export default function UnstakingModal({ isOpen, onDismiss, stakingInfo }: Staki
 
   // monitor call to help UI loading state
   const addTransaction = useTransactionAdder()
-  const [hash, setHash] = useState<string | undefined>()
-  const [attempting, setAttempting] = useState(false)
+  const [txHash, setTxHash] = useState<string | undefined>()
+  const [attemptingTxn, setAttemptingTxn] = useState(false)
 
   function wrappedOndismiss() {
-    setHash(undefined)
-    setAttempting(false)
+    setTxHash(undefined)
+    setAttemptingTxn(false)
     onDismiss()
   }
 
-  const stakingContract = useStakingContract()
+  const stakingContract = useStakingRouterContract(stakingInfo)
 
-  async function onWithdraw() {
-    if (stakingContract && stakingInfo?.stakedAmount && account) {
-      setAttempting(true)
-      await stakingContract
-        .unstakeMyTokens(stakingInfo?.poolIndex)
-        .then((response: TransactionResponse) => {
-          addTransaction(response, {
-            summary: t`Withdraw deposited liquidity`,
-          })
-          setHash(response.hash)
-        })
-        .catch((error: any) => {
-          setAttempting(false)
-          console.log(error)
-        })
+  const onWithdraw = useCallback(async () => {
+    if (!stakingContract) return
+
+    const estimate = stakingContract.estimateGas.unstakeMyTokens
+    const method = stakingContract.unstakeMyTokens
+    let args: Array<string | string[] | number> = []
+
+    if (stakingInfo.version === 1) {
+      args = [stakingInfo.poolIndex]
+    } else if (stakingInfo.version === 2) {
+      args = []
     }
-  }
+
+    setAttemptingTxn(true)
+    await estimate(...args)
+      .then((estimatedGasLimit) =>
+        method(...args, {
+          gasLimit: calculateGasMargin(estimatedGasLimit),
+        }).then((response: any) => {
+          addTransaction(response, {
+            summary: t`Withdraw
+            ${currency0 && currency1 ? `${currency0.symbol}:${currency1.symbol}` : stakingInfo.stakedToken.symbol}`,
+          })
+
+          setTxHash(response.hash)
+        })
+      )
+      .catch((error) => {
+        setAttemptingTxn(false)
+        // we only care if the error is something _other_ than the user rejected the tx
+        if ((error as any)?.code !== 4001) {
+          console.error(error)
+        }
+      })
+  }, [stakingContract])
 
   let error: string | undefined
   if (!account) {
@@ -76,7 +95,7 @@ export default function UnstakingModal({ isOpen, onDismiss, stakingInfo }: Staki
 
   return (
     <Modal isOpen={isOpen} onDismiss={wrappedOndismiss} maxHeight={90}>
-      {!attempting && !hash && (
+      {!attemptingTxn && !txHash && (
         <ContentWrapper gap="lg">
           <RowBetween>
             <TYPE.mediumHeader>
@@ -125,7 +144,7 @@ export default function UnstakingModal({ isOpen, onDismiss, stakingInfo }: Staki
           </ButtonError>
         </ContentWrapper>
       )}
-      {attempting && !hash && (
+      {attemptingTxn && !txHash && (
         <LoadingView onDismiss={wrappedOndismiss}>
           <AutoColumn gap="12px" justify={'center'}>
             <TYPE.body fontSize={20}>
@@ -144,8 +163,8 @@ export default function UnstakingModal({ isOpen, onDismiss, stakingInfo }: Staki
           </AutoColumn>
         </LoadingView>
       )}
-      {hash && (
-        <SubmittedView onDismiss={wrappedOndismiss} hash={hash}>
+      {txHash && (
+        <SubmittedView onDismiss={wrappedOndismiss} hash={txHash}>
           <AutoColumn gap="12px" justify={'center'}>
             <TYPE.largeHeader>
               <Trans>Transaction Submitted</Trans>

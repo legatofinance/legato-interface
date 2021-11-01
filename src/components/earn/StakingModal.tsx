@@ -13,7 +13,7 @@ import { Pair } from '@lambodoge/sdk'
 import { Token, CurrencyAmount } from '@uniswap/sdk-core'
 import { useActiveWeb3React } from '../../hooks/web3'
 import { maxAmountSpend } from '../../utils/maxAmountSpend'
-import { usePairContract, useStakingRouterContract, useV2RouterContract } from '../../hooks/useContract'
+import { usePairContract, useStakingRouterContract } from '../../hooks/useContract'
 import { STAKING_ROUTER_ADDRESS } from 'constants/addresses'
 import { useApproveCallback, ApprovalState } from '../../hooks/useApproveCallback'
 import { StakingInfo, useDerivedStakeInfo } from '../../state/stake/hooks'
@@ -111,29 +111,25 @@ export default function StakingModal({ isOpen, onDismiss, stakingInfo, userLiqui
       throw new Error('Attempting to add reward without approval. Please contact support.')
     }
 
-    const amount = parsedAmount?.quotient.toString(16)
+    const amount = parsedAmount?.quotient.toString()
     if (!amount) return
 
     const estimate = stakingContract.estimateGas.stakeTokens
     const method = stakingContract.stakeTokens
-    const value = null
     let args: Array<string | string[] | number> = []
 
     if (stakingInfo.version === 1) {
-      args = [stakingInfo.poolIndex, `0x${amount}`]
+      args = [stakingInfo.poolIndex, amount]
     } else if (stakingInfo.version === 2) {
-      args = [`0x${amount}`]
+      args = [amount]
     }
 
     setAttemptingTxn(true)
-    await estimate(...args, value ? { value } : {})
+    await estimate(...args)
       .then((estimatedGasLimit) =>
         method(...args, {
-          ...(value ? { value } : {}),
           gasLimit: calculateGasMargin(estimatedGasLimit),
         }).then((response: any) => {
-          setAttemptingTxn(false)
-
           addTransaction(response, {
             summary: t`Stake
             ${currency0 && currency1 ? `${currency0.symbol}:${currency1.symbol}` : stakingInfo.stakedToken.symbol}`,
@@ -149,7 +145,7 @@ export default function StakingModal({ isOpen, onDismiss, stakingInfo, userLiqui
           console.error(error)
         }
       })
-  }, [approval])
+  }, [approval, stakingContract, parsedAmount])
 
   // wrapped onUserInput to clear signatures
   const onUserInput = useCallback((typedValue: string) => {
@@ -233,9 +229,9 @@ export default function StakingModal({ isOpen, onDismiss, stakingInfo, userLiqui
             </TYPE.largeHeader>
             <TYPE.body fontSize={20}>
               <Trans>
-                {parsedAmount?.toFixed(18)}
+                {parsedAmount?.toFixed(6, { groupSeparator: ',' })}
                 {currency0 && currency1
-                  ? ` ${currency0.symbol}-${currency1.symbol}`
+                  ? ` ${currency0.symbol}:${currency1.symbol}`
                   : ` ${stakingInfo?.stakedToken.symbol}`}
               </Trans>
             </TYPE.body>
@@ -251,7 +247,7 @@ export default function StakingModal({ isOpen, onDismiss, stakingInfo, userLiqui
             <TYPE.body fontSize={20}>
               <Trans>
                 Deposited&nbsp;
-                {parsedAmount?.toSignificant(4)}
+                {parsedAmount?.toFixed(6, { groupSeparator: ',' })}
                 {currency0 && currency1
                   ? ` ${currency0.symbol}-${currency1.symbol}`
                   : ` ${stakingInfo?.stakedToken.symbol}`}

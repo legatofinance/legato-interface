@@ -19,6 +19,7 @@ const StyledDialogOverlay = styled(AnimatedDialogOverlay)`
     justify-content: center;
 
     background-color: ${({ theme }) => theme.modalBG};
+    backdrop-filter: blur(10px);
   }
 `
 

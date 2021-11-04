@@ -20,6 +20,7 @@ import Row from '../Row'
 import { Dots } from '../swap/styleds'
 import Web3Status from '../Web3Status'
 import NetworkCard from './NetworkCard'
+import VipCard from './VipCard'
 import UniBalanceContent from './UniBalanceContent'
 
 const HeaderFrame = styled.div<{ showBackground: boolean }>`
@@ -288,6 +289,7 @@ export default function Header() {
       </HeaderLinks>
 
       <HeaderControls>
+        <VipCard />
         <NetworkCard />
         <HeaderElement>
           <AccountElement active={!!account} style={{ pointerEvents: 'auto' }}>

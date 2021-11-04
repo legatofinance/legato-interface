@@ -1,61 +1,5 @@
 [
 	{
-		"inputs": [
-			{
-				"internalType": "address",
-				"name": "vault",
-				"type": "address"
-			},
-			{
-				"internalType": "address",
-				"name": "ldogeToken",
-				"type": "address"
-			},
-			{
-				"internalType": "address",
-				"name": "WBNB",
-				"type": "address"
-			},
-			{
-				"internalType": "address",
-				"name": "BUSD",
-				"type": "address"
-			},
-			{
-				"internalType": "address",
-				"name": "LegatoStakeV2V1Address",
-				"type": "address"
-			},
-			{
-				"internalType": "address",
-				"name": "LDOGE_WBNB_pair",
-				"type": "address"
-			},
-			{
-				"internalType": "address",
-				"name": "BUSD_WBNB_pair",
-				"type": "address"
-			},
-			{
-				"internalType": "uint256",
-				"name": "minimumLDOGEHoldingsInDollars",
-				"type": "uint256"
-			},
-			{
-				"internalType": "uint256",
-				"name": "minimumLDOGEHoldingsInLDOGE",
-				"type": "uint256"
-			},
-			{
-				"internalType": "uint256",
-				"name": "creationFeePrice",
-				"type": "uint256"
-			}
-		],
-		"stateMutability": "nonpayable",
-		"type": "constructor"
-	},
-	{
 		"anonymous": false,
 		"inputs": [
 			{
@@ -132,274 +76,21 @@
 		"type": "event"
 	},
 	{
-		"inputs": [],
-		"name": "_BUSD",
-		"outputs": [
-			{
-				"internalType": "address",
-				"name": "",
-				"type": "address"
-			}
-		],
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"inputs": [],
-		"name": "_BUSD_WBNB_pair",
-		"outputs": [
-			{
-				"internalType": "address",
-				"name": "",
-				"type": "address"
-			}
-		],
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"inputs": [],
-		"name": "_LDOGE_WBNB_pair",
-		"outputs": [
-			{
-				"internalType": "address",
-				"name": "",
-				"type": "address"
-			}
-		],
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"inputs": [],
-		"name": "_LegatoStakeV2V1Address",
-		"outputs": [
-			{
-				"internalType": "address",
-				"name": "",
-				"type": "address"
-			}
-		],
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"inputs": [],
-		"name": "_WBNB",
-		"outputs": [
-			{
-				"internalType": "address",
-				"name": "",
-				"type": "address"
-			}
-		],
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
 		"inputs": [
 			{
 				"internalType": "address",
-				"name": "",
+				"name": "poolAddress",
 				"type": "address"
-			}
-		],
-		"name": "_authorizedCallers",
-		"outputs": [
-			{
-				"internalType": "bool",
-				"name": "",
-				"type": "bool"
-			}
-		],
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"inputs": [
+			},
 			{
 				"internalType": "uint256",
-				"name": "",
+				"name": "amount",
 				"type": "uint256"
 			}
 		],
-		"name": "_authorizedCallersArray",
-		"outputs": [
-			{
-				"internalType": "address",
-				"name": "",
-				"type": "address"
-			}
-		],
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"inputs": [],
-		"name": "_creationFeePrice",
-		"outputs": [
-			{
-				"internalType": "uint256",
-				"name": "",
-				"type": "uint256"
-			}
-		],
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"inputs": [],
-		"name": "_factory",
-		"outputs": [
-			{
-				"internalType": "contract LegatoStakeV2Factory",
-				"name": "",
-				"type": "address"
-			}
-		],
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"inputs": [],
-		"name": "_ldogeToken",
-		"outputs": [
-			{
-				"internalType": "address",
-				"name": "",
-				"type": "address"
-			}
-		],
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"inputs": [],
-		"name": "_minimumLDOGEHoldingsInDollars",
-		"outputs": [
-			{
-				"internalType": "uint256",
-				"name": "",
-				"type": "uint256"
-			}
-		],
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"inputs": [],
-		"name": "_minimumLDOGEHoldingsInLDOGE",
-		"outputs": [
-			{
-				"internalType": "uint256",
-				"name": "",
-				"type": "uint256"
-			}
-		],
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"inputs": [],
-		"name": "_minimumVotes",
-		"outputs": [
-			{
-				"internalType": "uint256",
-				"name": "",
-				"type": "uint256"
-			}
-		],
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"inputs": [],
-		"name": "_owner",
-		"outputs": [
-			{
-				"internalType": "address",
-				"name": "",
-				"type": "address"
-			}
-		],
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"inputs": [],
-		"name": "_poolIndex",
-		"outputs": [
-			{
-				"internalType": "uint256",
-				"name": "",
-				"type": "uint256"
-			}
-		],
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "uint256",
-				"name": "",
-				"type": "uint256"
-			}
-		],
-		"name": "_pools",
-		"outputs": [
-			{
-				"internalType": "address",
-				"name": "",
-				"type": "address"
-			}
-		],
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"inputs": [],
-		"name": "_timeLock",
-		"outputs": [
-			{
-				"internalType": "uint256",
-				"name": "",
-				"type": "uint256"
-			}
-		],
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"inputs": [],
-		"name": "_vault",
-		"outputs": [
-			{
-				"internalType": "address",
-				"name": "",
-				"type": "address"
-			}
-		],
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "uint256",
-				"name": "",
-				"type": "uint256"
-			}
-		],
-		"name": "_vote",
-		"outputs": [
-			{
-				"internalType": "address",
-				"name": "",
-				"type": "address"
-			}
-		],
-		"stateMutability": "view",
+		"name": "addRewardToPool",
+		"outputs": [],
+		"stateMutability": "nonpayable",
 		"type": "function"
 	},
 	{
@@ -825,25 +516,6 @@
 	{
 		"inputs": [
 			{
-				"internalType": "address",
-				"name": "",
-				"type": "address"
-			}
-		],
-		"name": "creationFeesReceived",
-		"outputs": [
-			{
-				"internalType": "uint256",
-				"name": "",
-				"type": "uint256"
-			}
-		],
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
 				"internalType": "uint256",
 				"name": "WBNBamount",
 				"type": "uint256"
@@ -855,295 +527,10 @@
 		"type": "function"
 	},
 	{
-		"inputs": [
-			{
-				"internalType": "address",
-				"name": "pool",
-				"type": "address"
-			}
-		],
-		"name": "getPoolInfoByAddress",
-		"outputs": [
-			{
-				"components": [
-					{
-						"internalType": "address",
-						"name": "ldogeToken",
-						"type": "address"
-					},
-					{
-						"internalType": "address",
-						"name": "WBNB",
-						"type": "address"
-					},
-					{
-						"internalType": "address",
-						"name": "BUSD",
-						"type": "address"
-					},
-					{
-						"internalType": "address",
-						"name": "LegatoStakeV2V1Address",
-						"type": "address"
-					},
-					{
-						"internalType": "address",
-						"name": "LDOGE_WBNB_pair",
-						"type": "address"
-					},
-					{
-						"internalType": "address",
-						"name": "BUSD_WBNB_pair",
-						"type": "address"
-					},
-					{
-						"internalType": "uint256",
-						"name": "minimumLDOGEHoldingsInDollars",
-						"type": "uint256"
-					},
-					{
-						"internalType": "uint256",
-						"name": "minimumLDOGEHoldingsInLDOGE",
-						"type": "uint256"
-					},
-					{
-						"internalType": "address",
-						"name": "parentOwner",
-						"type": "address"
-					},
-					{
-						"internalType": "address",
-						"name": "poolCreator",
-						"type": "address"
-					},
-					{
-						"internalType": "address",
-						"name": "stakedToken",
-						"type": "address"
-					},
-					{
-						"internalType": "address",
-						"name": "rewardToken",
-						"type": "address"
-					},
-					{
-						"internalType": "uint256",
-						"name": "stakeTax",
-						"type": "uint256"
-					},
-					{
-						"internalType": "uint256",
-						"name": "unstakeTax",
-						"type": "uint256"
-					},
-					{
-						"internalType": "uint256",
-						"name": "unstakeRewardTax",
-						"type": "uint256"
-					},
-					{
-						"internalType": "uint256",
-						"name": "stakePeriod",
-						"type": "uint256"
-					},
-					{
-						"internalType": "uint256",
-						"name": "rewardTokensByPeriod",
-						"type": "uint256"
-					},
-					{
-						"internalType": "uint256",
-						"name": "minTotalStakedForFullReward",
-						"type": "uint256"
-					},
-					{
-						"internalType": "uint256",
-						"name": "minStakersForFullReward",
-						"type": "uint256"
-					},
-					{
-						"internalType": "uint256",
-						"name": "minUserStakesForReward",
-						"type": "uint256"
-					},
-					{
-						"internalType": "uint256",
-						"name": "minStakeTime",
-						"type": "uint256"
-					},
-					{
-						"internalType": "bool",
-						"name": "keepTax",
-						"type": "bool"
-					},
-					{
-						"internalType": "bool",
-						"name": "disabled",
-						"type": "bool"
-					}
-				],
-				"internalType": "struct StakePool.Pool",
-				"name": "",
-				"type": "tuple"
-			}
-		],
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "uint256",
-				"name": "pool",
-				"type": "uint256"
-			}
-		],
-		"name": "getPoolInfoByIndex",
-		"outputs": [
-			{
-				"components": [
-					{
-						"internalType": "address",
-						"name": "ldogeToken",
-						"type": "address"
-					},
-					{
-						"internalType": "address",
-						"name": "WBNB",
-						"type": "address"
-					},
-					{
-						"internalType": "address",
-						"name": "BUSD",
-						"type": "address"
-					},
-					{
-						"internalType": "address",
-						"name": "LegatoStakeV2V1Address",
-						"type": "address"
-					},
-					{
-						"internalType": "address",
-						"name": "LDOGE_WBNB_pair",
-						"type": "address"
-					},
-					{
-						"internalType": "address",
-						"name": "BUSD_WBNB_pair",
-						"type": "address"
-					},
-					{
-						"internalType": "uint256",
-						"name": "minimumLDOGEHoldingsInDollars",
-						"type": "uint256"
-					},
-					{
-						"internalType": "uint256",
-						"name": "minimumLDOGEHoldingsInLDOGE",
-						"type": "uint256"
-					},
-					{
-						"internalType": "address",
-						"name": "parentOwner",
-						"type": "address"
-					},
-					{
-						"internalType": "address",
-						"name": "poolCreator",
-						"type": "address"
-					},
-					{
-						"internalType": "address",
-						"name": "stakedToken",
-						"type": "address"
-					},
-					{
-						"internalType": "address",
-						"name": "rewardToken",
-						"type": "address"
-					},
-					{
-						"internalType": "uint256",
-						"name": "stakeTax",
-						"type": "uint256"
-					},
-					{
-						"internalType": "uint256",
-						"name": "unstakeTax",
-						"type": "uint256"
-					},
-					{
-						"internalType": "uint256",
-						"name": "unstakeRewardTax",
-						"type": "uint256"
-					},
-					{
-						"internalType": "uint256",
-						"name": "stakePeriod",
-						"type": "uint256"
-					},
-					{
-						"internalType": "uint256",
-						"name": "rewardTokensByPeriod",
-						"type": "uint256"
-					},
-					{
-						"internalType": "uint256",
-						"name": "minTotalStakedForFullReward",
-						"type": "uint256"
-					},
-					{
-						"internalType": "uint256",
-						"name": "minStakersForFullReward",
-						"type": "uint256"
-					},
-					{
-						"internalType": "uint256",
-						"name": "minUserStakesForReward",
-						"type": "uint256"
-					},
-					{
-						"internalType": "uint256",
-						"name": "minStakeTime",
-						"type": "uint256"
-					},
-					{
-						"internalType": "bool",
-						"name": "keepTax",
-						"type": "bool"
-					},
-					{
-						"internalType": "bool",
-						"name": "disabled",
-						"type": "bool"
-					}
-				],
-				"internalType": "struct StakePool.Pool",
-				"name": "",
-				"type": "tuple"
-			}
-		],
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
 		"inputs": [],
 		"name": "initiateTimeLock",
 		"outputs": [],
 		"stateMutability": "nonpayable",
-		"type": "function"
-	},
-	{
-		"inputs": [],
-		"name": "owner",
-		"outputs": [
-			{
-				"internalType": "address",
-				"name": "",
-				"type": "address"
-			}
-		],
-		"stateMutability": "view",
 		"type": "function"
 	},
 	{
@@ -1246,6 +633,10 @@
 		"type": "function"
 	},
 	{
+		"stateMutability": "payable",
+		"type": "receive"
+	},
+	{
 		"inputs": [],
 		"name": "vote",
 		"outputs": [],
@@ -1253,7 +644,669 @@
 		"type": "function"
 	},
 	{
-		"stateMutability": "payable",
-		"type": "receive"
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "vault",
+				"type": "address"
+			},
+			{
+				"internalType": "address",
+				"name": "ldogeToken",
+				"type": "address"
+			},
+			{
+				"internalType": "address",
+				"name": "WBNB",
+				"type": "address"
+			},
+			{
+				"internalType": "address",
+				"name": "BUSD",
+				"type": "address"
+			},
+			{
+				"internalType": "address",
+				"name": "LegatoStakeV1Address",
+				"type": "address"
+			},
+			{
+				"internalType": "address",
+				"name": "LDOGE_WBNB_pair",
+				"type": "address"
+			},
+			{
+				"internalType": "address",
+				"name": "BUSD_WBNB_pair",
+				"type": "address"
+			},
+			{
+				"internalType": "uint256",
+				"name": "minimumLDOGEHoldingsInDollars",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "minimumLDOGEHoldingsInLDOGE",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "creationFeePrice",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "nonpayable",
+		"type": "constructor"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			}
+		],
+		"name": "_authorizedCallers",
+		"outputs": [
+			{
+				"internalType": "bool",
+				"name": "",
+				"type": "bool"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"name": "_authorizedCallersArray",
+		"outputs": [
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "_BUSD",
+		"outputs": [
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "_BUSD_WBNB_pair",
+		"outputs": [
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "_creationFeePrice",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "_factory",
+		"outputs": [
+			{
+				"internalType": "contract LegatoStakeV2Factory",
+				"name": "",
+				"type": "address"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "_lastPoolId",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "_LDOGE_WBNB_pair",
+		"outputs": [
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "_ldogeToken",
+		"outputs": [
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "_LegatoStakeV1Address",
+		"outputs": [
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "_minimumLDOGEHoldingsInDollars",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "_minimumLDOGEHoldingsInLDOGE",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "_minimumVotes",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "_owner",
+		"outputs": [
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "_poolIndex",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"name": "_pools",
+		"outputs": [
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "_timeLock",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "_vault",
+		"outputs": [
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"name": "_vote",
+		"outputs": [
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "_WBNB",
+		"outputs": [
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "computeMinimumLDOGEHoldings",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			}
+		],
+		"name": "creationFeesReceived",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "pool",
+				"type": "address"
+			}
+		],
+		"name": "getPoolInfoByAddress",
+		"outputs": [
+			{
+				"components": [
+					{
+						"internalType": "address",
+						"name": "legatoCreator",
+						"type": "address"
+					},
+					{
+						"internalType": "address",
+						"name": "vault",
+						"type": "address"
+					},
+					{
+						"internalType": "address",
+						"name": "ldogeToken",
+						"type": "address"
+					},
+					{
+						"internalType": "address",
+						"name": "WBNB",
+						"type": "address"
+					},
+					{
+						"internalType": "address",
+						"name": "BUSD",
+						"type": "address"
+					},
+					{
+						"internalType": "address",
+						"name": "LegatoStakeV1Address",
+						"type": "address"
+					},
+					{
+						"internalType": "address",
+						"name": "LDOGE_WBNB_pair",
+						"type": "address"
+					},
+					{
+						"internalType": "address",
+						"name": "BUSD_WBNB_pair",
+						"type": "address"
+					},
+					{
+						"internalType": "address",
+						"name": "parentOwner",
+						"type": "address"
+					},
+					{
+						"internalType": "address",
+						"name": "stakedToken",
+						"type": "address"
+					},
+					{
+						"internalType": "address",
+						"name": "rewardToken",
+						"type": "address"
+					},
+					{
+						"internalType": "uint256",
+						"name": "stakeTax",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "unstakeTax",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "unstakeRewardTax",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "stakePeriod",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "rewardTokensByPeriod",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "minTotalStakedForFullReward",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "minStakersForFullReward",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "minUserStakesForReward",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "minStakeTime",
+						"type": "uint256"
+					},
+					{
+						"internalType": "bool",
+						"name": "keepTax",
+						"type": "bool"
+					},
+					{
+						"internalType": "bool",
+						"name": "disabled",
+						"type": "bool"
+					}
+				],
+				"internalType": "struct StakePool.Pool",
+				"name": "",
+				"type": "tuple"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "pool",
+				"type": "uint256"
+			}
+		],
+		"name": "getPoolInfoByIndex",
+		"outputs": [
+			{
+				"components": [
+					{
+						"internalType": "address",
+						"name": "legatoCreator",
+						"type": "address"
+					},
+					{
+						"internalType": "address",
+						"name": "vault",
+						"type": "address"
+					},
+					{
+						"internalType": "address",
+						"name": "ldogeToken",
+						"type": "address"
+					},
+					{
+						"internalType": "address",
+						"name": "WBNB",
+						"type": "address"
+					},
+					{
+						"internalType": "address",
+						"name": "BUSD",
+						"type": "address"
+					},
+					{
+						"internalType": "address",
+						"name": "LegatoStakeV1Address",
+						"type": "address"
+					},
+					{
+						"internalType": "address",
+						"name": "LDOGE_WBNB_pair",
+						"type": "address"
+					},
+					{
+						"internalType": "address",
+						"name": "BUSD_WBNB_pair",
+						"type": "address"
+					},
+					{
+						"internalType": "address",
+						"name": "parentOwner",
+						"type": "address"
+					},
+					{
+						"internalType": "address",
+						"name": "stakedToken",
+						"type": "address"
+					},
+					{
+						"internalType": "address",
+						"name": "rewardToken",
+						"type": "address"
+					},
+					{
+						"internalType": "uint256",
+						"name": "stakeTax",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "unstakeTax",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "unstakeRewardTax",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "stakePeriod",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "rewardTokensByPeriod",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "minTotalStakedForFullReward",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "minStakersForFullReward",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "minUserStakesForReward",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "minStakeTime",
+						"type": "uint256"
+					},
+					{
+						"internalType": "bool",
+						"name": "keepTax",
+						"type": "bool"
+					},
+					{
+						"internalType": "bool",
+						"name": "disabled",
+						"type": "bool"
+					}
+				],
+				"internalType": "struct StakePool.Pool",
+				"name": "",
+				"type": "tuple"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "account",
+				"type": "address"
+			}
+		],
+		"name": "hasMinimumLdogeHolding",
+		"outputs": [
+			{
+				"internalType": "bool",
+				"name": "",
+				"type": "bool"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "owner",
+		"outputs": [
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
 	}
 ]

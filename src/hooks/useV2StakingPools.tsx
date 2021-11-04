@@ -154,7 +154,7 @@ export function useV2StakingPools(): StakingInfo[] | undefined {
         apy = JSBI.multiply(apy, JSBI.BigInt(10))
       }
 
-      const apyFraction = new Fraction(apy, 100)
+      const apyFraction = new Fraction(apy, 1_000)
 
       const convertedStakedAmount = CurrencyAmount.fromRawAmount(
         stakedToken,

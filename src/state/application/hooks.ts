@@ -21,6 +21,10 @@ export function useToggleModal(modal: ApplicationModal): () => void {
   return useCallback(() => dispatch(setOpenModal(open ? null : modal)), [dispatch, modal, open])
 }
 
+export function useVipModalToggle(): () => void {
+  return useToggleModal(ApplicationModal.VIP)
+}
+
 export function useWalletModalToggle(): () => void {
   return useToggleModal(ApplicationModal.WALLET)
 }

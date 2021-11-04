@@ -17,6 +17,7 @@ export enum ApplicationModal {
   VOTE,
   POOL_OVERVIEW_OPTIONS,
   ARBITRUM_OPTIONS,
+  VIP,
 }
 
 export const updateChainId = createAction<{ chainId: number | null }>('application/updateChainId')

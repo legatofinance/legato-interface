@@ -110,6 +110,7 @@ export function useV2StakingPools(): StakingInfo[] | undefined {
       const stakeTokenTax = pools[i]?.result?.[0]?.stakeTax
       const unstakeTokenTax = pools[i]?.result?.[0]?.unstakeTax
       const unstakeRewardTax = pools[i]?.result?.[0]?.unstakeRewardTax
+      const minimumUserStaked = pools[i]?.result?.[0]?.minUserStakesForReward
       const rewardTokensByPeriod = rewardTokensByPeriods[i]
       const stakedPairsToken0State = stakedPairsToken0?.[i]
       const stakedPairsToken1State = stakedPairsToken1?.[i]
@@ -179,6 +180,8 @@ export function useV2StakingPools(): StakingInfo[] | undefined {
       const unstakingTax = new Percent(unstakeTokenTax, SP_MAKER_BIPS_BASE)
       const retrievingTax = new Percent(unstakeRewardTax, SP_MAKER_BIPS_BASE)
 
+      const minimumToStake = CurrencyAmount.fromRawAmount(stakedToken, JSBI.BigInt(minimumUserStaked ?? 0))
+
       const poolIndex = (poolIndexes[i]?.[0] as number) ?? -1
 
       stakingInfos.push({
@@ -206,6 +209,7 @@ export function useV2StakingPools(): StakingInfo[] | undefined {
         stakingTax,
         unstakingTax,
         retrievingTax,
+        minimumToStake,
         open: (totalRewardsState?.result?.[0] ?? 0) > 0,
       })
     }

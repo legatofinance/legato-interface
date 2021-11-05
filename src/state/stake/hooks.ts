@@ -79,6 +79,8 @@ export interface StakingInfo {
   unstakingTax: Percent
   // Tax on retrieve
   retrievingTax: Percent
+  // The minimum amount to stake to start receiving rewards
+  minimumToStake: CurrencyAmount<Token>
   // Is the pool for staking
   open: boolean
 }
@@ -116,6 +118,7 @@ export function useStakingInfo(): StakingInfo[] | undefined {
 
   const minStakers = useSingleContractMultipleData(stackingContract, 'getMinStakersForFullReward', poolId ?? [])
   const minTotalStaked = useSingleContractMultipleData(stackingContract, 'getMinTotalStakedForFullReward', poolId ?? [])
+  const minUserStaked = useSingleContractMultipleData(stackingContract, 'getMinUserStakesForReward', poolId ?? [])
   const countStakers = useSingleContractMultipleData(stackingContract, 'getCountStakers', poolId ?? [])
   const stakeTokenTax = useSingleContractMultipleData(stackingContract, 'getStakeTokenTax', poolId ?? [])
   const unstakeTokenTax = useSingleContractMultipleData(stackingContract, 'getUnstakeTokenTax', poolId ?? [])
@@ -168,6 +171,7 @@ export function useStakingInfo(): StakingInfo[] | undefined {
       const claimedAmountState = claimedAmounts[i]
       const minStakersState = minStakers[i]
       const minTotalStakedState = minTotalStaked[i]
+      const minUserStakedState = minUserStaked[i]
       const countStakersState = countStakers[i]
       const stakeTokenTaxState = stakeTokenTax[i]
       const unstakeTokenTaxState = unstakeTokenTax[i]
@@ -244,6 +248,11 @@ export function useStakingInfo(): StakingInfo[] | undefined {
       const unstakingTax = new Percent(unstakeTokenTaxState?.result?.[0] ?? 0, SP_MAKER_BIPS_BASE)
       const retrievingTax = new Percent(unstakeRewardTaxState?.result?.[0] ?? 0, SP_MAKER_BIPS_BASE)
 
+      const minimumToStake = CurrencyAmount.fromRawAmount(
+        stakedToken,
+        JSBI.BigInt(minUserStakedState?.result?.[0] ?? 0)
+      )
+
       const poolIndex = listPools.result?.[0][i][1]?.toNumber() ?? -1
 
       stakingInfos.push({
@@ -271,6 +280,7 @@ export function useStakingInfo(): StakingInfo[] | undefined {
         stakingTax,
         unstakingTax,
         retrievingTax,
+        minimumToStake,
         open: (totalRewardsState?.result?.[0] ?? 0) > 0,
       })
     }

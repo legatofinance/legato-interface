@@ -28,6 +28,8 @@ import { LightCard } from '../Card'
 import useTheme from 'hooks/useTheme'
 import { useVipStatus } from 'hooks/useVip'
 import { Dots } from 'pages/Pool/styleds'
+import DoubleCurrencyLogo from '../DoubleLogo'
+import CurrencyLogo from '../CurrencyLogo'
 
 const HypotheticalRewardRate = styled.div<{ dim: boolean }>`
   display: flex;
@@ -234,6 +236,20 @@ export default function StakingModal({ isOpen, onDismiss, stakingInfo, userLiqui
               </RowBetween>
             </AutoColumn>
           </LightCard>
+
+          <RowBetween style={{ padding: '0 8px' }}>
+            {currency0 && currency1 ? (
+              <DoubleCurrencyLogo currency0={currency0} currency1={currency1} style={{ margin: '0 8px' }} />
+            ) : (
+              <CurrencyLogo currency={stakingInfo.stakedToken} style={{ marginRight: 8 }} />
+            )}
+            <RowBetween>
+              <TYPE.white color={theme.text2}>{stakedCurrencySymbol} minimum deposit:</TYPE.white>
+              <TYPE.white fontWeight={600} textAlign="right" style={{ overflowWrap: 'break-word' }}>
+                {stakingInfo.minimumToStake.toFixed(6, { groupSeparator: ',' })}
+              </TYPE.white>
+            </RowBetween>
+          </RowBetween>
 
           <HypotheticalRewardRate dim={!hypotheticalRewardRate.greaterThan('0')}>
             <div>

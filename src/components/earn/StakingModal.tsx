@@ -1,4 +1,5 @@
 import { useState, useCallback } from 'react'
+import { Text } from 'rebass'
 import { useV2LiquidityTokenPermit } from '../../hooks/useERC20Permit'
 import { formatFixedCurrencyAmount } from '../../utils/formatCurrencyAmount'
 import Modal from '../Modal'
@@ -6,8 +7,7 @@ import { AutoColumn } from '../Column'
 import styled from 'styled-components/macro'
 import { RowBetween } from '../Row'
 import { TYPE, CloseIcon } from '../../theme'
-import { ButtonConfirmed, ButtonError } from '../Button'
-import ProgressCircles from '../ProgressSteps'
+import { ButtonPrimary, ButtonError } from '../Button'
 import CurrencyInputPanel from '../CurrencyInputPanel'
 import { Pair } from '@lambodoge/sdk'
 import { Token, CurrencyAmount, Percent } from '@uniswap/sdk-core'
@@ -27,6 +27,7 @@ import { calculateGasMargin } from '../../utils/calculateGasMargin'
 import { LightCard } from '../Card'
 import useTheme from 'hooks/useTheme'
 import { useVipStatus } from 'hooks/useVip'
+import { Dots } from 'pages/Pool/styleds'
 
 const HypotheticalRewardRate = styled.div<{ dim: boolean }>`
   display: flex;
@@ -65,12 +66,16 @@ export default function StakingModal({ isOpen, onDismiss, stakingInfo, userLiqui
   const currency0 = token0 ? unwrappedToken(token0) : undefined
   const currency1 = token1 ? unwrappedToken(token1) : undefined
 
+  const stakedCurrencySymbol =
+    currency0 && currency1 ? ` ${currency0.symbol}:${currency1.symbol}` : ` ${stakingInfo?.stakedToken.symbol}`
+
   // track and parse user input
   const [typedValue, setTypedValue] = useState('')
   const { parsedAmount, error } = useDerivedStakeInfo(
     typedValue,
     stakingInfo.stakedAmount.currency,
-    userLiquidityUnstaked
+    userLiquidityUnstaked,
+    stakedCurrencySymbol
   )
   const parsedAmountWrapped = parsedAmount?.wrapped
 
@@ -169,6 +174,23 @@ export default function StakingModal({ isOpen, onDismiss, stakingInfo, userLiqui
     maxAmountInput && onUserInput(maxAmountInput.toExact())
   }, [maxAmountInput, onUserInput])
 
+  const Buttons = () =>
+    approval !== ApprovalState.APPROVED && !error ? (
+      <ButtonPrimary onClick={approveCallback} disabled={approval === ApprovalState.PENDING}>
+        {approval === ApprovalState.PENDING ? (
+          <Dots>
+            <Trans>Approving {stakedCurrencySymbol}</Trans>
+          </Dots>
+        ) : (
+          <Trans>Approve {stakedCurrencySymbol}</Trans>
+        )}
+      </ButtonPrimary>
+    ) : (
+      <ButtonError onClick={onStake} disabled={!!error}>
+        <Text fontWeight={500}>{error ? error : <Trans>Deposit</Trans>}</Text>
+      </ButtonError>
+    )
+
   return (
     <Modal isOpen={isOpen} onDismiss={wrappedOnDismiss} maxHeight={90}>
       {!attemptingTxn && !txHash && (
@@ -224,30 +246,13 @@ export default function StakingModal({ isOpen, onDismiss, stakingInfo, userLiqui
               <Trans>
                 {hypotheticalRewardRate
                   .multiply(BIG_INT_SECONDS_IN_WEEK.toString())
-                  .toSignificant(4, { groupSeparator: ',' })}{' '}
+                  .toFixed(6, { groupSeparator: ',' })}{' '}
                 {stakingInfo?.rewardToken.symbol} / week
               </Trans>
             </TYPE.black>
           </HypotheticalRewardRate>
 
-          <RowBetween>
-            <ButtonConfirmed
-              mr="0.5rem"
-              onClick={approveCallback}
-              confirmed={approval === ApprovalState.APPROVED}
-              disabled={approval !== ApprovalState.NOT_APPROVED}
-            >
-              <Trans>Approve</Trans>
-            </ButtonConfirmed>
-            <ButtonError
-              disabled={!!error || approval !== ApprovalState.APPROVED}
-              error={!!error && !!parsedAmount}
-              onClick={onStake}
-            >
-              {error ?? <Trans>Deposit</Trans>}
-            </ButtonError>
-          </RowBetween>
-          <ProgressCircles steps={[approval === ApprovalState.APPROVED]} disabled={true} />
+          <Buttons />
         </ContentWrapper>
       )}
       {attemptingTxn && !txHash && (
@@ -259,9 +264,7 @@ export default function StakingModal({ isOpen, onDismiss, stakingInfo, userLiqui
             <TYPE.body fontSize={20}>
               <Trans>
                 {parsedAmount?.toFixed(6, { groupSeparator: ',' })}
-                {currency0 && currency1
-                  ? ` ${currency0.symbol}:${currency1.symbol}`
-                  : ` ${stakingInfo?.stakedToken.symbol}`}
+                {stakedCurrencySymbol}
               </Trans>
             </TYPE.body>
           </AutoColumn>
@@ -277,9 +280,7 @@ export default function StakingModal({ isOpen, onDismiss, stakingInfo, userLiqui
               <Trans>
                 Deposited&nbsp;
                 {parsedAmount?.toFixed(6, { groupSeparator: ',' })}
-                {currency0 && currency1
-                  ? ` ${currency0.symbol}-${currency1.symbol}`
-                  : ` ${stakingInfo?.stakedToken.symbol}`}
+                {stakedCurrencySymbol}
               </Trans>
             </TYPE.body>
           </AutoColumn>

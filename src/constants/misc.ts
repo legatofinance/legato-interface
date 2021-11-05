@@ -41,7 +41,7 @@ const WEI_DENOM = JSBI.exponentiate(JSBI.BigInt(10), JSBI.BigInt(18))
 
 export const SP_MAKER_PERCENTAGE_SCALE = JSBI.BigInt(10000)
 export const SP_MAKER_BIPS_BASE = JSBI.multiply(SP_MAKER_PERCENTAGE_SCALE, JSBI.BigInt(100))
-export const SP_MAKER_BNB_FEE = CurrencyAmount.fromRawAmount(Ether.onChain(SupportedChainId.MAINNET), 1) //WEI_DENOM) // 1 BNB
+export const SP_MAKER_BNB_FEE = CurrencyAmount.fromRawAmount(Ether.onChain(SupportedChainId.MAINNET), WEI_DENOM) // 1 BNB
 export const SP_MAKER_STAKING_TAX = new Percent(JSBI.BigInt(200), BIPS_BASE) // 2%
 export const SP_MAKER_UNSTAKING_TAX = new Percent(JSBI.BigInt(400), BIPS_BASE) // 4%
 export const SP_MAKER_PERIOD = JSBI.BigInt(60)

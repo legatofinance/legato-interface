@@ -305,7 +305,8 @@ export function useTotalUniEarned(): CurrencyAmount<Token> | undefined {
 export function useDerivedStakeInfo(
   typedValue: string,
   stakingToken: Token | undefined,
-  userLiquidityUnstaked: CurrencyAmount<Token> | undefined
+  userLiquidityUnstaked: CurrencyAmount<Token> | undefined,
+  stakingTokenSymbol: string
 ): {
   parsedAmount?: CurrencyAmount<Token>
   error?: string
@@ -314,17 +315,16 @@ export function useDerivedStakeInfo(
 
   const parsedInput: CurrencyAmount<Token> | undefined = tryParseAmount(typedValue, stakingToken)
 
-  const parsedAmount =
-    parsedInput && userLiquidityUnstaked && JSBI.lessThanOrEqual(parsedInput.quotient, userLiquidityUnstaked.quotient)
-      ? parsedInput
-      : undefined
+  const parsedAmount = parsedInput && userLiquidityUnstaked ? parsedInput : undefined
 
   let error: string | undefined
   if (!account) {
     error = t`Connect Wallet`
   }
-  if (!parsedAmount) {
+  if (!parsedInput || !userLiquidityUnstaked) {
     error = error ?? t`Enter an amount`
+  } else if (!JSBI.lessThanOrEqual(parsedInput.quotient, userLiquidityUnstaked.quotient)) {
+    error = error ?? t`Insufficient ${stakingTokenSymbol} balance`
   }
 
   return {

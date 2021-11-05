@@ -1,6 +1,6 @@
 import { t } from '@lingui/macro'
 import { BigNumber } from '@ethersproject/bignumber'
-import { Token, CurrencyAmount, Fraction } from '@uniswap/sdk-core'
+import { Token, CurrencyAmount, Fraction, Percent } from '@uniswap/sdk-core'
 import { Pair } from '@lambodoge/sdk'
 import JSBI from 'jsbi'
 import { useMemo } from 'react'
@@ -23,7 +23,7 @@ import STAKING_ROUTER_ABI from 'abis/staking-router.json'
 import { abi as IUniswapV2PairABI } from '@uniswap/v2-core/build/IUniswapV2Pair.json'
 import { STAKING_ROUTER_ADDRESS } from 'constants/addresses'
 import { SupportedChainId } from 'constants/chains'
-import { BIG_INT_SECONDS_IN_YEAR } from 'constants/misc'
+import { BIG_INT_SECONDS_IN_YEAR, SP_MAKER_BIPS_BASE } from 'constants/misc'
 import getPoolUid from 'utils/getPoolUid'
 
 const PAIR_INTERFACE = new Interface(IUniswapV2PairABI)
@@ -73,6 +73,12 @@ export interface StakingInfo {
     totalStakedAmount: CurrencyAmount<Token>,
     totalRewardRate: CurrencyAmount<Token>
   ) => CurrencyAmount<Token>
+  // Tax on stake
+  stakingTax: Percent
+  // Tax on unstake
+  unstakingTax: Percent
+  // Tax on retrieve
+  retrievingTax: Percent
   // Is the pool for staking
   open: boolean
 }
@@ -111,6 +117,9 @@ export function useStakingInfo(): StakingInfo[] | undefined {
   const minStakers = useSingleContractMultipleData(stackingContract, 'getMinStakersForFullReward', poolId ?? [])
   const minTotalStaked = useSingleContractMultipleData(stackingContract, 'getMinTotalStakedForFullReward', poolId ?? [])
   const countStakers = useSingleContractMultipleData(stackingContract, 'getCountStakers', poolId ?? [])
+  const stakeTokenTax = useSingleContractMultipleData(stackingContract, 'getStakeTokenTax', poolId ?? [])
+  const unstakeTokenTax = useSingleContractMultipleData(stackingContract, 'getUnstakeTokenTax', poolId ?? [])
+  const unstakeRewardTax = useSingleContractMultipleData(stackingContract, 'getUnstakeRewardTax', poolId ?? [])
 
   const stakedTokensAddresses = useMemo(
     () => listPools.result?.[0].map((pool: Array<MethodArg>) => pool[2]) ?? [],
@@ -160,6 +169,9 @@ export function useStakingInfo(): StakingInfo[] | undefined {
       const minStakersState = minStakers[i]
       const minTotalStakedState = minTotalStaked[i]
       const countStakersState = countStakers[i]
+      const stakeTokenTaxState = stakeTokenTax[i]
+      const unstakeTokenTaxState = unstakeTokenTax[i]
+      const unstakeRewardTaxState = unstakeRewardTax[i]
       const stakedPairsToken0State = stakedPairsToken0?.[i]
       const stakedPairsToken1State = stakedPairsToken1?.[i]
       const stakedToken = stakedTokens?.[i]
@@ -234,6 +246,10 @@ export function useStakingInfo(): StakingInfo[] | undefined {
 
       const claimedAmount = CurrencyAmount.fromRawAmount(rewardToken, JSBI.BigInt(claimedAmountState?.result?.[0] ?? 0))
 
+      const stakingTax = new Percent(stakeTokenTaxState?.result?.[0] ?? 0, SP_MAKER_BIPS_BASE)
+      const unstakingTax = new Percent(unstakeTokenTaxState?.result?.[0] ?? 0, SP_MAKER_BIPS_BASE)
+      const retrievingTax = new Percent(unstakeRewardTaxState?.result?.[0] ?? 0, SP_MAKER_BIPS_BASE)
+
       const poolIndex = listPools.result?.[0][i][1]?.toNumber() ?? -1
 
       stakingInfos.push({
@@ -258,6 +274,9 @@ export function useStakingInfo(): StakingInfo[] | undefined {
           totalRewardRate
         ),
         getHypotheticalRewardRate,
+        stakingTax,
+        unstakingTax,
+        retrievingTax,
         open: (totalRewardsState?.result?.[0] ?? 0) > 0,
       })
     }

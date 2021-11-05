@@ -30,7 +30,7 @@ export const STAKING_ROUTER_ADDRESS: AddressMap = {
 
 export const V2_STAKING_ROUTER_ADDRESS: AddressMap = {
   [SupportedChainId.MAINNET]: '0xc5085681e2291fd825431716bc6973e3bf50d697',
-  [SupportedChainId.TESTNET]: '0x5C1b1e4d7BF9FDe599318Aa3883e90401D1aBe19',
+  [SupportedChainId.TESTNET]: '0x58FCbB467dFcb6bB08E406CaD6cfe495581120A3',
 }
 
 export const TIMELOCK_ADDRESS: AddressMap = constructSameAddressMap('0x1a9C8182C09F50C8318d769245beA52c32BE35BC')

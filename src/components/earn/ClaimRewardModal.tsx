@@ -1,4 +1,5 @@
 import { useState, useCallback } from 'react'
+import { Percent } from '@uniswap/sdk-core'
 import Modal from '../Modal'
 import { AutoColumn } from '../Column'
 import styled from 'styled-components/macro'
@@ -13,6 +14,10 @@ import { useTransactionAdder } from '../../state/transactions/hooks'
 import { useActiveWeb3React } from '../../hooks/web3'
 import { t, Trans } from '@lingui/macro'
 import { calculateGasMargin } from '../../utils/calculateGasMargin'
+import { LightCard } from '../Card'
+import useTheme from 'hooks/useTheme'
+import { NON_VIP_LEGATO_STAKE_V2_TAX, VIP_LEGATO_STAKE_V2_TAX } from '../../constants/misc'
+import { useVipStatus } from 'hooks/useVip'
 
 const ContentWrapper = styled(AutoColumn)`
   width: 100%;
@@ -28,6 +33,13 @@ interface StakingModalProps {
 
 export default function ClaimRewardModal({ isOpen, onDismiss, stakingInfo, retrieve }: StakingModalProps) {
   const { account } = useActiveWeb3React()
+  const theme = useTheme()
+  const vipStatus = useVipStatus()
+
+  let legatoTax = new Percent('0')
+  if (stakingInfo.version === 2) {
+    legatoTax = vipStatus ? VIP_LEGATO_STAKE_V2_TAX : NON_VIP_LEGATO_STAKE_V2_TAX
+  }
 
   // monitor call to help UI loading state
   const addTransaction = useTransactionAdder()
@@ -130,11 +142,31 @@ export default function ClaimRewardModal({ isOpen, onDismiss, stakingInfo, retri
               </TYPE.body>
             </AutoColumn>
           )}
-          <TYPE.subHeader style={{ textAlign: 'center' }}>
-            <Trans>
-              When you {retrieve ? 'retrieve' : 'claim'} without withdrawing your liquidity remains in the mining pool.
-            </Trans>
-          </TYPE.subHeader>
+
+          {retrieve && (
+            <LightCard>
+              <AutoColumn gap="md">
+                <RowBetween>
+                  <TYPE.black fontSize={14} fontWeight={400} color={theme.text2}>
+                    <Trans>Legato tax {!vipStatus && !legatoTax.equalTo('0') ? "(you're not VIP)" : ''}</Trans>
+                  </TYPE.black>
+                  <TYPE.black textAlign="right" fontSize={14} color={theme.text1}>
+                    {legatoTax.toFixed(0)}%
+                  </TYPE.black>
+                </RowBetween>
+
+                <RowBetween>
+                  <TYPE.black fontSize={14} fontWeight={400} color={theme.text2}>
+                    <Trans>Pool tax on retrieve</Trans>
+                  </TYPE.black>
+                  <TYPE.black textAlign="right" fontSize={14} color={theme.text1}>
+                    {stakingInfo.retrievingTax.toFixed(0)}%
+                  </TYPE.black>
+                </RowBetween>
+              </AutoColumn>
+            </LightCard>
+          )}
+
           <ButtonError
             disabled={!!error}
             error={!!error && !!stakingInfo?.stakedAmount}

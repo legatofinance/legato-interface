@@ -10,7 +10,7 @@ import { ButtonConfirmed, ButtonError } from '../Button'
 import ProgressCircles from '../ProgressSteps'
 import CurrencyInputPanel from '../CurrencyInputPanel'
 import { Pair } from '@lambodoge/sdk'
-import { Token, CurrencyAmount } from '@uniswap/sdk-core'
+import { Token, CurrencyAmount, Percent } from '@uniswap/sdk-core'
 import { useActiveWeb3React } from '../../hooks/web3'
 import { maxAmountSpend } from '../../utils/maxAmountSpend'
 import { usePairContract, useStakingRouterContract } from '../../hooks/useContract'
@@ -22,8 +22,11 @@ import { useTransactionAdder } from '../../state/transactions/hooks'
 import { LoadingView, SubmittedView } from '../ModalViews'
 import { t, Trans } from '@lingui/macro'
 import { unwrappedToken } from '../../utils/unwrappedToken'
-import { BIG_INT_SECONDS_IN_WEEK } from '../../constants/misc'
+import { BIG_INT_SECONDS_IN_WEEK, NON_VIP_LEGATO_STAKE_V2_TAX, VIP_LEGATO_STAKE_V2_TAX } from '../../constants/misc'
 import { calculateGasMargin } from '../../utils/calculateGasMargin'
+import { LightCard } from '../Card'
+import useTheme from 'hooks/useTheme'
+import { useVipStatus } from 'hooks/useVip'
 
 const HypotheticalRewardRate = styled.div<{ dim: boolean }>`
   display: flex;
@@ -48,6 +51,13 @@ interface StakingModalProps {
 
 export default function StakingModal({ isOpen, onDismiss, stakingInfo, userLiquidityUnstaked }: StakingModalProps) {
   const { chainId, library } = useActiveWeb3React()
+  const theme = useTheme()
+  const vipStatus = useVipStatus()
+
+  let legatoTax = new Percent('0')
+  if (stakingInfo.version === 2) {
+    legatoTax = vipStatus ? VIP_LEGATO_STAKE_V2_TAX : NON_VIP_LEGATO_STAKE_V2_TAX
+  }
 
   const token0 = stakingInfo?.stakedPairTokens?.[0]
   const token1 = stakingInfo?.stakedPairTokens?.[1]
@@ -181,6 +191,28 @@ export default function StakingModal({ isOpen, onDismiss, stakingInfo, userLiqui
             id="stake-liquidity-token"
           />
 
+          <LightCard>
+            <AutoColumn gap="md">
+              <RowBetween>
+                <TYPE.black fontSize={14} fontWeight={400} color={theme.text2}>
+                  <Trans>Legato tax {!vipStatus && !legatoTax.equalTo('0') ? "(you're not VIP)" : ''}</Trans>
+                </TYPE.black>
+                <TYPE.black textAlign="right" fontSize={14} color={theme.text1}>
+                  {legatoTax.toFixed(0)}%
+                </TYPE.black>
+              </RowBetween>
+
+              <RowBetween>
+                <TYPE.black fontSize={14} fontWeight={400} color={theme.text2}>
+                  <Trans>Pool tax on deposit</Trans>
+                </TYPE.black>
+                <TYPE.black textAlign="right" fontSize={14} color={theme.text1}>
+                  {stakingInfo.stakingTax.toFixed(0)}%
+                </TYPE.black>
+              </RowBetween>
+            </AutoColumn>
+          </LightCard>
+
           <HypotheticalRewardRate dim={!hypotheticalRewardRate.greaterThan('0')}>
             <div>
               <TYPE.black fontWeight={600}>
@@ -193,10 +225,7 @@ export default function StakingModal({ isOpen, onDismiss, stakingInfo, userLiqui
                 {hypotheticalRewardRate
                   .multiply(BIG_INT_SECONDS_IN_WEEK.toString())
                   .toSignificant(4, { groupSeparator: ',' })}{' '}
-                {currency0 && currency1
-                  ? `${currency0.symbol}-${currency1.symbol}`
-                  : `${stakingInfo?.stakedToken.symbol}`}{' '}
-                / week
+                {stakingInfo?.rewardToken.symbol} / week
               </Trans>
             </TYPE.black>
           </HypotheticalRewardRate>

@@ -9,6 +9,7 @@ import { LDOGE } from 'constants/tokens'
 import { SupportedChainId } from 'constants/chains'
 import useTheme from 'hooks/useTheme'
 import { useTokenBalance } from 'state/wallet/hooks'
+import { NON_VIP_LEGATO_STAKE_V2_TAX, VIP_LEGATO_STAKE_V2_TAX } from '../../constants/misc'
 
 import Confetti from '../Confetti'
 import { CardBGImage, DataCard, CardNoise, CardSection } from '../earn/styled'
@@ -124,7 +125,7 @@ export default function VipModal() {
                       <Trans>Legato tax on stake / unstake</Trans>
                     </TYPE.black>
                     <TYPE.black textAlign="right" fontSize={14} color={theme.text1}>
-                      2%
+                      {NON_VIP_LEGATO_STAKE_V2_TAX.toFixed(0)}%
                     </TYPE.black>
                   </RowBetween>
                 </AutoColumn>
@@ -142,7 +143,7 @@ export default function VipModal() {
                     <Trans>Legato tax on stake / unstake</Trans>
                   </TYPE.black>
                   <TYPE.black textAlign="right" fontSize={14} color={theme.text1}>
-                    0%
+                    {VIP_LEGATO_STAKE_V2_TAX.toFixed(0)}%
                   </TYPE.black>
                 </RowBetween>
               </AutoColumn>

@@ -1,6 +1,6 @@
 import { useMemo } from 'react'
 import { StakingInfo } from 'state/stake/hooks'
-import { Token, CurrencyAmount, Fraction } from '@uniswap/sdk-core'
+import { Token, CurrencyAmount, Fraction, Percent } from '@uniswap/sdk-core'
 import JSBI from 'jsbi'
 import {
   useMultipleContractSingleData,
@@ -16,7 +16,7 @@ import { Interface } from '@ethersproject/abi'
 import V2_STAKING_ROUTER_ABI from 'abis/v2-staking-router.json'
 import { abi as IUniswapV2PairABI } from '@uniswap/v2-core/build/IUniswapV2Pair.json'
 import { useToken, useTokens } from 'hooks/Tokens'
-import { BIG_INT_SECONDS_IN_YEAR } from 'constants/misc'
+import { BIG_INT_SECONDS_IN_YEAR, SP_MAKER_BIPS_BASE } from 'constants/misc'
 import getPoolUid from 'utils/getPoolUid'
 
 const PAIR_INTERFACE = new Interface(IUniswapV2PairABI)
@@ -107,6 +107,9 @@ export function useV2StakingPools(): StakingInfo[] | undefined {
       const minTotalStaked = pools[i]?.result?.[0]?.minTotalStakedForFullReward
       const countStakersState = countStakers[i]
       const stakePeriod = stakePeriods[i]
+      const stakeTokenTax = pools[i]?.result?.[0]?.stakeTax
+      const unstakeTokenTax = pools[i]?.result?.[0]?.unstakeTax
+      const unstakeRewardTax = pools[i]?.result?.[0]?.unstakeRewardTax
       const rewardTokensByPeriod = rewardTokensByPeriods[i]
       const stakedPairsToken0State = stakedPairsToken0?.[i]
       const stakedPairsToken1State = stakedPairsToken1?.[i]
@@ -182,6 +185,10 @@ export function useV2StakingPools(): StakingInfo[] | undefined {
 
       const claimedAmount = CurrencyAmount.fromRawAmount(rewardToken, JSBI.BigInt(claimedAmountState?.result?.[0] ?? 0))
 
+      const stakingTax = new Percent(stakeTokenTax, SP_MAKER_BIPS_BASE)
+      const unstakingTax = new Percent(unstakeTokenTax, SP_MAKER_BIPS_BASE)
+      const retrievingTax = new Percent(unstakeRewardTax, SP_MAKER_BIPS_BASE)
+
       const poolIndex = (poolIndexes[i]?.[0] as number) ?? -1
 
       stakingInfos.push({
@@ -206,6 +213,9 @@ export function useV2StakingPools(): StakingInfo[] | undefined {
           totalRewardRate
         ),
         getHypotheticalRewardRate,
+        stakingTax,
+        unstakingTax,
+        retrievingTax,
         open: (totalRewardsState?.result?.[0] ?? 0) > 0,
       })
     }

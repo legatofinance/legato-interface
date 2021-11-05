@@ -194,7 +194,7 @@ export default function Earn() {
             break
         }
       })
-  }, [v1StakingInfos, v2StakingPools, hideEmptyDeposits, sortingOption, debouncedSearch])
+  }, [v1StakingInfos, v2StakingPools, poolsData, hideEmptyDeposits, sortingOption, debouncedSearch])
 
   return (
     <PageWrapper gap="lg" justify="center">
@@ -293,9 +293,9 @@ export default function Earn() {
               <Trans>No active pools</Trans>
             </OutlineCard>
           ) : (
-            stakingInfos?.map((stakingInfo, index) => {
+            stakingInfos?.map((stakingInfo) => {
               // need to sort by added liquidity here
-              return <PoolCard key={`${currencyId(stakingInfo?.stakedToken)}-${index}`} stakingInfo={stakingInfo} />
+              return <PoolCard key={stakingInfo?.poolUid} stakingInfo={stakingInfo} />
             })
           )}
         </PoolSection>

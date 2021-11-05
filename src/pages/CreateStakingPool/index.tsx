@@ -35,6 +35,7 @@ import { useWalletModalToggle } from 'state/application/hooks'
 import TransactionConfirmationModal, { ConfirmationModalContent } from '../../components/TransactionConfirmationModal'
 import Review from './Review'
 import {
+  SP_MAKER_PERCENTAGE_SCALE,
   SP_MAKER_BNB_FEE,
   SP_MAKER_STAKING_TAX,
   SP_MAKER_UNSTAKING_TAX,
@@ -301,9 +302,9 @@ export default function CreateStakingPool() {
       {
         stakedToken: tokenStaked.address,
         rewardToken: tokenReward.address,
-        stakeTax: tax ? SP_MAKER_STAKING_TAX.toFixed(0) : 0,
-        unstakeTax: tax ? SP_MAKER_UNSTAKING_TAX.toFixed(0) : 0,
-        unstakeRewardTax: tax ? SP_MAKER_UNSTAKING_TAX.toFixed(0) : 0,
+        stakeTax: tax ? SP_MAKER_STAKING_TAX.multiply(SP_MAKER_PERCENTAGE_SCALE).toFixed(0) : 0,
+        unstakeTax: tax ? SP_MAKER_UNSTAKING_TAX.multiply(SP_MAKER_PERCENTAGE_SCALE).toFixed(0) : 0,
+        unstakeRewardTax: tax ? SP_MAKER_UNSTAKING_TAX.multiply(SP_MAKER_PERCENTAGE_SCALE).toFixed(0) : 0,
         stakePeriod: SP_MAKER_PERIOD.toString(),
         rewardTokensByPeriod: rewardTokensPerDay
           .divide(BIG_INT_SECONDS_IN_DAY)

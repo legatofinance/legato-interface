@@ -132,48 +132,38 @@ export function useV2StakingPools(): StakingInfo[] | undefined {
         )
       }
 
-      let minStakedRewardPercentage = JSBI.divide(
-        JSBI.BigInt(minTotalStaked ?? 1),
-        JSBI.BigInt(totalStakedState?.result?.[0].eq(0) ? 1 : totalStakedState?.result?.[0] ?? 1)
-      )
-      if (JSBI.lessThan(minStakedRewardPercentage, JSBI.BigInt(1))) minStakedRewardPercentage = JSBI.BigInt(1)
+      const totalDeposit = totalStakedState?.result?.[0]
+      const totalStakers = countStakersState?.result?.[0]
 
-      let minStakersRewardPercentage = JSBI.divide(
-        JSBI.BigInt(minStakers ?? 1),
-        JSBI.BigInt(countStakersState?.result?.[0].eq(0) ? 1 : countStakersState?.result?.[0] ?? 1)
-      )
-      if (JSBI.lessThan(minStakersRewardPercentage, JSBI.BigInt(1))) minStakersRewardPercentage = JSBI.BigInt(1)
+      let minStakedRatio = new Fraction(minTotalStaked ?? 1, totalDeposit?.eq(0) ? 1 : totalDeposit ?? 1)
+      if (minStakedRatio.lessThan(1)) minStakedRatio = new Fraction(1)
 
-      const rewardPercentage = JSBI.multiply(minStakersRewardPercentage, minStakedRewardPercentage)
+      let minStakersRatio = new Fraction(minStakers ?? 1, totalStakers?.eq(0) ? 1 : totalStakers ?? 1)
+      if (minStakersRatio.lessThan(1)) minStakersRatio = new Fraction(1)
 
-      let apy = JSBI.divide(JSBI.BigInt(rewardTokensByPeriod), JSBI.BigInt(stakePeriod))
-      apy = JSBI.multiply(apy, BIG_INT_SECONDS_IN_YEAR)
-      apy = JSBI.multiply(apy, JSBI.BigInt(10_000))
-      apy = JSBI.divide(apy, rewardPercentage)
-      apy = JSBI.divide(apy, JSBI.BigInt(totalStakedState?.result?.[0].eq(0) ? 1 : totalStakedState?.result?.[0] ?? 1))
-      apy = JSBI.subtract(apy, JSBI.BigInt(1))
+      const rewardDivider = minStakersRatio.multiply(minStakedRatio)
 
-      if (totalStakedState?.result?.[0].eq(0) || !totalStakedState?.result?.[0]) {
-        apy = JSBI.multiply(apy, JSBI.BigInt(10))
+      let apy = new Fraction(rewardTokensByPeriod, stakePeriod)
+      apy = apy.multiply(BIG_INT_SECONDS_IN_YEAR).multiply(100)
+
+      if (totalDeposit?.eq(0) ?? true) {
+        apy = apy.divide(JSBI.BigInt(minTotalStaked ?? 1)).divide(JSBI.BigInt(minStakers ?? 1))
+      } else {
+        apy = apy.divide(rewardDivider).divide(JSBI.BigInt(totalDeposit ?? 1))
       }
-
-      const apyFraction = new Fraction(apy, 1_000)
 
       const convertedStakedAmount = CurrencyAmount.fromRawAmount(
         stakedToken,
         JSBI.BigInt(stakedAmountState?.result?.[0] ?? 0)
       )
 
-      const convertedTotalStaked = CurrencyAmount.fromRawAmount(
-        stakedToken,
-        JSBI.BigInt(totalStakedState?.result?.[0] ?? 0)
-      )
+      const convertedTotalStaked = CurrencyAmount.fromRawAmount(stakedToken, JSBI.BigInt(totalDeposit ?? 0))
 
       const totalRewardRate = CurrencyAmount.fromFractionalAmount(
         rewardToken,
         JSBI.BigInt(rewardTokensByPeriod),
         JSBI.BigInt(stakePeriod)
-      ).divide(rewardPercentage)
+      ).divide(rewardDivider)
 
       const stakedPairTokens: [Token, Token] | undefined =
         stakedPairsToken0State && stakedPairsToken1State ? [stakedPairsToken0State, stakedPairsToken1State] : undefined
@@ -202,7 +192,7 @@ export function useV2StakingPools(): StakingInfo[] | undefined {
         unclaimedAmount: unclaimedAmount,
         claimedAmount: claimedAmount,
         rewardRate: CurrencyAmount.fromRawAmount(rewardToken, JSBI.BigInt(0)),
-        apy: apyFraction,
+        apy,
         stakedAmount: convertedStakedAmount,
         totalStakedAmount: convertedTotalStaked,
         totalRewardRate: totalRewardRate,

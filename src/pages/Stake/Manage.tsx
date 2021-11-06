@@ -101,15 +101,19 @@ export default function Manage({
 }: RouteComponentProps<{ version: string; poolIndex: string }>) {
   const poolUid = getPoolUid(version, poolIndex)
 
-  const v1StakingInfos = useStakingInfo() ?? []
-  const v2StakingPools = useV2StakingPools() ?? []
+  const v1StakingInfos = useStakingInfo()
+  const v2StakingPools = useV2StakingPools()
 
-  const stakingInfo = [...v1StakingInfos, ...v2StakingPools].filter((stakingInfo) => stakingInfo?.poolUid == poolUid)[0]
+  const stakingInfo = [...(v1StakingInfos ?? []), ...(v2StakingPools ?? [])].filter(
+    (stakingInfo) => stakingInfo?.poolUid == poolUid
+  )[0]
 
   if (stakingInfo) {
     return <ManageContent stakingInfo={stakingInfo} />
+    // } else if (v1StakingInfos !== undefined && v2StakingPools !== undefined) {
+    //   return <Redirect to={{ pathname: '/stake' }} />
   } else {
-    return <Redirect to={{ pathname: '/stake' }} />
+    return null
   }
 }
 

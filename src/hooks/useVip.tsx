@@ -1,6 +1,6 @@
 import { CurrencyAmount } from '@uniswap/sdk-core'
 
-import { useSingleCallResult, NEVER_RELOAD } from 'state/multicall/hooks'
+import { useSingleCallResult, useSingleContractMultipleData, NEVER_RELOAD } from 'state/multicall/hooks'
 import { useV2StakingCreatorContract } from './useContract'
 import { useActiveWeb3React } from './web3'
 import { LDOGE } from 'constants/tokens'
@@ -10,9 +10,13 @@ export function useVipStatus() {
   const { chainId, account } = useActiveWeb3React()
   const v2StakingCreatorContract = useV2StakingCreatorContract()
 
-  const isVip = useSingleCallResult(v2StakingCreatorContract, 'hasMinimumLdogeHolding', account ? [account] : [])
+  const isVip = useSingleContractMultipleData(
+    v2StakingCreatorContract,
+    'hasMinimumLdogeHolding',
+    account ? [[account]] : []
+  )
 
-  return isVip.result?.[0] ?? false
+  return isVip?.[0]?.result?.[0] ?? false
 }
 
 export function useVipMinimumLdogeHolding() {

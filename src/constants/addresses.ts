@@ -29,7 +29,7 @@ export const STAKING_ROUTER_ADDRESS: AddressMap = {
 }
 
 export const V2_STAKING_ROUTER_ADDRESS: AddressMap = {
-  [SupportedChainId.MAINNET]: '0xc5085681e2291fd825431716bc6973e3bf50d697',
+  [SupportedChainId.MAINNET]: '0x99ef697cEdA5A143e18A3D0Ffcf9d709c09A32E3',
   [SupportedChainId.TESTNET]: '0x58FCbB467dFcb6bB08E406CaD6cfe495581120A3',
 }
 
